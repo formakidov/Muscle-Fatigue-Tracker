@@ -21,10 +21,7 @@ out/
 
 # Gradle files
 .gradle
-.gradle/
 build/
-gradlew
-gradlew.bat
 
 # Signing files
 .signing/
@@ -82,8 +79,6 @@ Thumbs.db
 .project
 .cproject
 .settings/
-
-gradle/wrapper
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
