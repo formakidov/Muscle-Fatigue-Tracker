@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0b450203219259b83ea61dac1970845b",
+    "identityHash": "bb83709dd9da4f1be014548a57120ef7",
     "entities": [
       {
         "tableName": "muscles",
@@ -38,7 +38,7 @@
       },
       {
         "tableName": "fatigue_logs",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `muscleId` INTEGER NOT NULL, `changeAmount` REAL NOT NULL, `timestamp` INTEGER NOT NULL, FOREIGN KEY(`muscleId`) REFERENCES `muscles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `muscleId` INTEGER NOT NULL, `value` REAL NOT NULL, `timestamp` INTEGER NOT NULL, FOREIGN KEY(`muscleId`) REFERENCES `muscles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -53,8 +53,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "changeAmount",
-            "columnName": "changeAmount",
+            "fieldPath": "value",
+            "columnName": "value",
             "affinity": "REAL",
             "notNull": true
           },
@@ -154,7 +154,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0b450203219259b83ea61dac1970845b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bb83709dd9da4f1be014548a57120ef7')"
     ]
   }
 }

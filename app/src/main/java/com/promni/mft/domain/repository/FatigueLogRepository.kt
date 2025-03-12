@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface FatigueLogRepository {
     fun getFatigueLogsForMuscle(muscleId: MuscleId): Flow<List<FatigueLog>>
-    suspend fun addFatigueLog(muscleId: MuscleId, changeAmount: Float)
+    suspend fun addFatigueLog(muscleId: MuscleId, value: Float)
 }

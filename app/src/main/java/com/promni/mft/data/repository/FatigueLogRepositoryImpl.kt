@@ -16,9 +16,9 @@ class FatigueLogRepositoryImpl(
     override fun getFatigueLogsForMuscle(muscleId: MuscleId): Flow<List<FatigueLog>> =
         fatigueLogDao.getLogsForMuscle(muscleId).map { it.map(FatigueLogEntity::asExternalModel) }
 
-    override suspend fun addFatigueLog(muscleId: MuscleId, changeAmount: Float) {
+    override suspend fun addFatigueLog(muscleId: MuscleId, value: Float) {
         fatigueLogDao.insertFatigueLog(
-            FatigueLogEntity(muscleId = muscleId, changeAmount = changeAmount, timestamp = System.currentTimeMillis())
+            FatigueLogEntity(muscleId = muscleId, value = value, timestamp = System.currentTimeMillis())
         )
     }
 }

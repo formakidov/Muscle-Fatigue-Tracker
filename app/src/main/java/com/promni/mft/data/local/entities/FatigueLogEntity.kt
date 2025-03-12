@@ -21,8 +21,8 @@ import com.promni.mft.domain.model.FatigueLog
 data class FatigueLogEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val muscleId: MuscleId,
-    val changeAmount: Float,
+    val value: Float,
     val timestamp: Long
 )
 
-fun FatigueLogEntity.asExternalModel() = FatigueLog(id, muscleId, changeAmount, timestamp)
+fun FatigueLogEntity.asExternalModel() = FatigueLog(id, value, muscleId, timestamp)
