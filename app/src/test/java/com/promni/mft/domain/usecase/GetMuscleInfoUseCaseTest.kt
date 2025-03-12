@@ -1,10 +1,11 @@
 package com.promni.mft.domain.usecase
 
-import com.promni.mft.domain.model.Muscle
 import com.promni.mft.domain.model.MuscleInfo
 import com.promni.mft.domain.repository.MuscleRepository
+import com.promni.mft.domain.util.MuscleInfoSorter
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -14,38 +15,45 @@ import org.junit.jupiter.api.Test
 class GetMuscleInfoUseCaseTest {
 
     private val muscleRepository: MuscleRepository = mockk()
-    private val getMuscleInfoUseCase = GetMuscleInfoUseCase(muscleRepository)
+    private val muscleInfoSorter: MuscleInfoSorter = mockk()
+    private val getMuscleInfoUseCase = GetMuscleInfoUseCase(muscleRepository, muscleInfoSorter)
 
     @Test
-    fun `test muscles order by recovery time and then alphabetically by name`() = runTest {
+    fun `invoke calls repository and sorter, and returns sorter's result`() = runTest {
         // Given
-        val now = System.currentTimeMillis()
-        val muscleInfoList = listOf(
-            MuscleInfo(Muscle(id = 1, name = "Triceps"), fatigue = 0.5f, expectedRecovery = 0L, totalRecoveryTime = 10L),
-            MuscleInfo(Muscle(id = 4, name = "Calves"), fatigue = 0.2f, expectedRecovery = 0L, totalRecoveryTime = 10L),
-            MuscleInfo(Muscle(id = 2, name = "Biceps"), fatigue = 0.3f, expectedRecovery = now + 5000L, totalRecoveryTime = 10L),
-            MuscleInfo(Muscle(id = 3, name = "Abs"), fatigue = 0.1f, expectedRecovery = now + 15000L, totalRecoveryTime = 10L),
+        val unsortedMuscleInfoList = listOf(
+            MuscleInfo(mockk(), fatigue = 0.5f, expectedRecovery = 0L, totalRecoveryTime = 10L),
+            MuscleInfo(mockk(), fatigue = 0.3f, expectedRecovery = 1000L, totalRecoveryTime = 10L)
         )
-        every { muscleRepository.observeMuscles() } returns flowOf(muscleInfoList)
+        val sortedMuscleInfoList = listOf( // This could be anything, we don't care, sorting logic is tested elsewhere
+            MuscleInfo(mockk(), fatigue = 0.1f, expectedRecovery = 2000L, totalRecoveryTime = 5L),
+            MuscleInfo(mockk(), fatigue = 0.8f, expectedRecovery = 500L, totalRecoveryTime = 20L)
+        )
+
+        every { muscleRepository.observeMuscles() } returns flowOf(unsortedMuscleInfoList)
+        every { muscleInfoSorter.sort(unsortedMuscleInfoList) } returns sortedMuscleInfoList
 
         // When
-        val fetchedMuscleInfoList = getMuscleInfoUseCase.invoke().first()
+        val result = getMuscleInfoUseCase.invoke().first()
 
         // Then
-        val expectedOrder = listOf("Biceps", "Abs", "Calves", "Triceps")
-        val actualOrder = fetchedMuscleInfoList.map { it.muscle.name }
-        assertEquals(expectedOrder, actualOrder)
+        verify(exactly = 1) { muscleRepository.observeMuscles() }
+        verify(exactly = 1) { muscleInfoSorter.sort(unsortedMuscleInfoList) } // Verify it's called with the unsorted list
+        assertEquals(sortedMuscleInfoList, result) // Verify the sorter's result is returned
     }
 
     @Test
-    fun `test muscles with empty list`() = runTest {
+    fun `invoke returns empty list when repository returns empty list`() = runTest {
         // Given
         every { muscleRepository.observeMuscles() } returns flowOf(emptyList())
+        every { muscleInfoSorter.sort(emptyList()) } returns emptyList()
 
         // When
-        val sortedMuscles = getMuscleInfoUseCase.invoke().first()
+        val result = getMuscleInfoUseCase.invoke().first()
 
         // Then
-        assertEquals(emptyList<MuscleInfo>(), sortedMuscles)
+        verify(exactly = 1) { muscleRepository.observeMuscles() }
+        verify(exactly = 1) { muscleInfoSorter.sort(emptyList()) } // Verify sorter is called
+        assertEquals(emptyList<MuscleInfo>(), result)
     }
 }

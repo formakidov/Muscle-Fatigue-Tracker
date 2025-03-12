@@ -21,10 +21,9 @@ class ChangeMuscleFatigueUseCase(
         val currentExpectedRecovery = expectedRecoveryRepository.fetchExpectedRecovery(muscleId)
         val currentFatigue = RecoveryCalculator.calculateCurrentFatigue(currentExpectedRecovery?.timestamp, totalRecoveryTime)
         val newFatigue = (currentFatigue + changeAmount).coerceIn(0f, 100f)
-
         if (newFatigue == currentFatigue) return
+        expectedRecoveryRepository.storeExpectedRecovery(muscleId, totalRecoveryTime, newFatigue)
 
         fatigueLogRepository.addFatigueLog(muscleId, changeAmount)
-        expectedRecoveryRepository.storeExpectedRecovery(muscleId, totalRecoveryTime, newFatigue)
     }
 }

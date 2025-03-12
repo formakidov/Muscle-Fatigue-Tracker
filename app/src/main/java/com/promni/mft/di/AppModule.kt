@@ -11,6 +11,7 @@ import com.promni.mft.domain.usecase.ChangeMuscleFatigueUseCase
 import com.promni.mft.domain.usecase.GetFatigueLogsUseCase
 import com.promni.mft.domain.usecase.GetMuscleInfoUseCase
 import com.promni.mft.domain.usecase.SetTotalRecoveryTimeUseCase
+import com.promni.mft.domain.util.MuscleInfoSorter
 import com.promni.mft.presentation.viewmodel.MusclesListViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.core.module.dsl.bind
@@ -38,6 +39,9 @@ val appModule = module {
     singleOf(::GetFatigueLogsUseCase)
     singleOf(::ChangeMuscleFatigueUseCase)
     singleOf(::SetTotalRecoveryTimeUseCase)
+
+    // Sorting
+    singleOf(::MuscleInfoSorter)
 
     // View Models
     viewModelOf(::MusclesListViewModel)

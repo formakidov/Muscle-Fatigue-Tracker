@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,8 +72,7 @@ fun MuscleListScreen(
             is MuscleUiState.Success -> {
                 val musclesInfo = uiState.musclesInfo
                 LazyColumn(contentPadding = PaddingValues(16.dp)) {
-                    items(musclesInfo.count()) { index ->
-                        val muscleInfo = musclesInfo[index]
+                    items(musclesInfo, key = { it.muscle.id }) { muscleInfo ->
                         MuscleItem(
                             muscleInfo = muscleInfo,
                             onClick = {
