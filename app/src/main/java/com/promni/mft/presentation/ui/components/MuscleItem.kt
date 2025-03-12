@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit
 fun MuscleItem(
     muscleInfo: MuscleInfo,
     onClick: () -> Unit,
-    onIncreaseFatigue: (MuscleInfo, Float) -> Unit
 ) {
     val backgroundGradient = getFatigueGradient(muscleInfo.fatigue)
 

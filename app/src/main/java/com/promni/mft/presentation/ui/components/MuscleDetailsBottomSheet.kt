@@ -31,7 +31,7 @@ fun MuscleDetailsBottomSheet(
     muscleInfo: MuscleInfo,
     logs: List<FatigueLog>,
     onDismiss: () -> Unit,
-    onFatigueChanged: (MuscleInfo, currentValue: Float, newValue: Float) -> Unit,
+    onFatigueChanged: (MuscleInfo, newValue: Float) -> Unit,
 ) {
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
@@ -45,7 +45,7 @@ fun MuscleDetailsBottomSheet(
                 value = fatigueSliderValue,
                 onValueChange = { fatigueSliderValue = it },
                 valueRange = 0f..1f,
-                onValueChangeFinished = { onFatigueChanged(muscleInfo, muscleInfo.fatigue, fatigueSliderValue * 100) },
+                onValueChangeFinished = { onFatigueChanged(muscleInfo, fatigueSliderValue * 100) },
                 modifier = Modifier.fillMaxWidth()
             )
 

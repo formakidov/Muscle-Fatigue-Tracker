@@ -13,17 +13,14 @@ class ChangeMuscleFatigueUseCase(
 ) {
     suspend operator fun invoke(
         muscleId: MuscleId,
-        changeAmount: Float,
+        newValue: Float,
     ) {
-        if (changeAmount == 0f) return
+        if (newValue < 0f || newValue > 100f) throw IllegalArgumentException("Fatigue value must be between 0 and 100")
 
         val totalRecoveryTime = muscleRepository.currentTotalRecoveryTime(muscleId)
-        val currentExpectedRecovery = expectedRecoveryRepository.fetchExpectedRecovery(muscleId)
-        val currentFatigue = RecoveryCalculator.calculateCurrentFatigue(currentExpectedRecovery?.timestamp, totalRecoveryTime)
-        val newFatigue = (currentFatigue + changeAmount).coerceIn(0f, 100f)
-        if (newFatigue == currentFatigue) return
-        expectedRecoveryRepository.storeExpectedRecovery(muscleId, totalRecoveryTime, newFatigue)
+        val expectedRecoveryTime = RecoveryCalculator.calculateExpectedRecovery(newValue, totalRecoveryTime)
+        expectedRecoveryRepository.setExpectedRecovery(muscleId, expectedRecoveryTime)
 
-        fatigueLogRepository.addFatigueLog(muscleId, changeAmount)
+        fatigueLogRepository.addFatigueLog(muscleId, newValue)
     }
 }

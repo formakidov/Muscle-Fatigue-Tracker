@@ -40,7 +40,6 @@ fun MuscleListScreen(
         fatigueLogUiState = fatigueLogUiState,
         selectedMuscleId = selectedMuscleId,
         onMuscleSelected = viewModel::selectMuscle,
-        onAddFatigue = viewModel::addFatigue,
         onFatigueChanged = viewModel::setFatigue,
     )
 }
@@ -53,8 +52,7 @@ fun MuscleListScreen(
     fatigueLogUiState: FatigueLogUiState,
     selectedMuscleId: MuscleId?,
     onMuscleSelected: (MuscleId) -> Unit,
-    onAddFatigue: (MuscleInfo, Float) -> Unit,
-    onFatigueChanged: (MuscleInfo, currentValue: Float, newValue: Float) -> Unit,
+    onFatigueChanged: (MuscleInfo, newValue: Float) -> Unit,
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     Box(
@@ -79,7 +77,6 @@ fun MuscleListScreen(
                                 onMuscleSelected(muscleInfo.muscle.id)
                                 showBottomSheet = true
                             },
-                            onIncreaseFatigue = onAddFatigue,
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                     }

@@ -52,19 +52,13 @@ class MusclesListViewModel(
         _selectedMuscleId.value = muscleId
     }
 
-    fun addFatigue(muscleInfo: MuscleInfo, changeAmount: Float) {
+    fun setFatigue(muscleInfo: MuscleInfo, newValue: Float) {
         viewModelScope.launch {
-            changeFatigueUseCase(muscleInfo.muscle.id, changeAmount)
+            changeFatigueUseCase(muscleInfo.muscle.id, newValue)
         }
     }
 
-    fun setFatigue(muscleInfo: MuscleInfo, currentValue: Float, newValue: Float) {
-        viewModelScope.launch {
-            changeFatigueUseCase(muscleInfo.muscle.id, newValue - currentValue)
-        }
-    }
-
-    fun updateTotalRecoveryTime(muscleId: MuscleId, newTotalRecoveryTime: Recovery) {
+    fun setTotalRecoveryTime(muscleId: MuscleId, newTotalRecoveryTime: Recovery) {
         viewModelScope.launch {
             setTotalRecoveryTimeUseCase(muscleId, newTotalRecoveryTime)
         }
