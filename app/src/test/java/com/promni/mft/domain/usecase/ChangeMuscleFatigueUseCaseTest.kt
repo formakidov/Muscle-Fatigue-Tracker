@@ -9,32 +9,32 @@ import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import io.mockk.just
-import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 
+@ExtendWith(MockKExtension::class)
 class ChangeMuscleFatigueUseCaseTest {
 
-    private val muscleRepository: MuscleRepository = mockk()
-    private val fatigueLogRepository: FatigueLogRepository = mockk()
-    private val expectedRecoveryRepository: ExpectedRecoveryRepository = mockk()
+    @MockK
+    lateinit var muscleRepository: MuscleRepository
 
-    private lateinit var changeMuscleFatigueUseCase: ChangeMuscleFatigueUseCase
+    @MockK
+    lateinit var fatigueLogRepository: FatigueLogRepository
+
+    @MockK
+    lateinit var expectedRecoveryRepository: ExpectedRecoveryRepository
+
+    @InjectMockKs
+    lateinit var changeMuscleFatigueUseCase: ChangeMuscleFatigueUseCase
 
     private val muscleId: Long = 1L
-
-    @BeforeEach
-    fun setup() {
-        changeMuscleFatigueUseCase = ChangeMuscleFatigueUseCase(
-            muscleRepository,
-            fatigueLogRepository,
-            expectedRecoveryRepository
-        )
-    }
 
     @Test
     fun invoke_withNegativeFatigueValue_throwsIllegalArgumentException() = runTest {

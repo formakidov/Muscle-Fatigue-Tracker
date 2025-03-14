@@ -5,26 +5,28 @@ import com.promni.mft.domain.repository.MuscleRepository
 import com.promni.mft.domain.util.MuscleInfoSorter
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
+@ExtendWith(MockKExtension::class)
 class GetMuscleInfoUseCaseTest {
+    @MockK
+    lateinit var muscleRepository: MuscleRepository
 
-    private val muscleRepository: MuscleRepository = mockk()
-    private val muscleInfoSorter: MuscleInfoSorter = mockk()
+    @MockK
+    lateinit var muscleInfoSorter: MuscleInfoSorter
 
-    private lateinit var getMuscleInfoUseCase: GetMuscleInfoUseCase
-
-    @BeforeEach
-    fun setup() {
-        getMuscleInfoUseCase = GetMuscleInfoUseCase(muscleRepository, muscleInfoSorter)
-    }
+    @InjectMockKs
+    lateinit var getMuscleInfoUseCase: GetMuscleInfoUseCase
 
     @Test
     fun `invoke calls repository and sorter, and returns sorter's result`() = runTest {
