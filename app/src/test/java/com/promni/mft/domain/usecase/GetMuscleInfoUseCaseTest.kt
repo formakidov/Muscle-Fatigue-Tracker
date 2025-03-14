@@ -3,6 +3,7 @@ package com.promni.mft.domain.usecase
 import com.promni.mft.domain.model.MuscleInfo
 import com.promni.mft.domain.repository.MuscleRepository
 import com.promni.mft.domain.util.MuscleInfoSorter
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -10,13 +11,20 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class GetMuscleInfoUseCaseTest {
 
     private val muscleRepository: MuscleRepository = mockk()
     private val muscleInfoSorter: MuscleInfoSorter = mockk()
-    private val getMuscleInfoUseCase = GetMuscleInfoUseCase(muscleRepository, muscleInfoSorter)
+
+    private lateinit var getMuscleInfoUseCase: GetMuscleInfoUseCase
+
+    @BeforeEach
+    fun setup() {
+        getMuscleInfoUseCase = GetMuscleInfoUseCase(muscleRepository, muscleInfoSorter)
+    }
 
     @Test
     fun `invoke calls repository and sorter, and returns sorter's result`() = runTest {
@@ -40,6 +48,7 @@ class GetMuscleInfoUseCaseTest {
         verify(exactly = 1) { muscleRepository.observeMuscles() }
         verify(exactly = 1) { muscleInfoSorter.sort(unsortedMuscleInfoList) } // Verify it's called with the unsorted list
         assertEquals(sortedMuscleInfoList, result) // Verify the sorter's result is returned
+        confirmVerified(muscleRepository, muscleInfoSorter)
     }
 
     @Test
@@ -55,5 +64,6 @@ class GetMuscleInfoUseCaseTest {
         verify(exactly = 1) { muscleRepository.observeMuscles() }
         verify(exactly = 1) { muscleInfoSorter.sort(emptyList()) } // Verify sorter is called
         assertEquals(emptyList<MuscleInfo>(), result)
+        confirmVerified(muscleRepository, muscleInfoSorter)
     }
 }
