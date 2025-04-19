@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.promni.mft.core.Result
 import com.promni.mft.core.asResult
 import com.promni.mft.data.local.entities.MuscleId
-import com.promni.mft.data.local.entities.Recovery
+
 import com.promni.mft.domain.model.FatigueLog
 import com.promni.mft.domain.model.MuscleInfo
 import com.promni.mft.domain.usecase.ChangeMuscleFatigueUseCase
@@ -58,7 +58,7 @@ class MusclesListViewModel(
         }
     }
 
-    fun setTotalRecoveryTime(muscleId: MuscleId, newTotalRecoveryTime: Recovery) {
+    fun setTotalRecoveryTime(muscleId: MuscleId, newTotalRecoveryTime: Long) {
         viewModelScope.launch {
             setTotalRecoveryTimeUseCase(muscleId, newTotalRecoveryTime)
         }

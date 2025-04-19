@@ -1,4 +1,4 @@
-package com.promni.shared
+package com.promni.mft
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

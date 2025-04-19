@@ -1,6 +1,6 @@
 package com.promni.mft.domain.usecase
 
-import com.promni.mft.domain.MuscleNotFoundException
+import com.promni.mft.MuscleNotFoundException
 import com.promni.mft.domain.repository.ExpectedRecoveryRepository
 import com.promni.mft.domain.repository.FatigueLogRepository
 import com.promni.mft.domain.repository.MuscleRepository

@@ -5,7 +5,6 @@ import androidx.room.PrimaryKey
 import com.promni.mft.domain.model.Muscle
 
 typealias MuscleId = Long
-typealias Recovery = Long
 
 const val DefaultTotalRecoveryTime = 4 * 24 * 60 * 60 * 1000L // 4 days
 
@@ -15,7 +14,7 @@ data class MuscleEntity(
     val name: String,
     val totalRecoveryMillis: Long?,
 ) {
-    val totalRecovery: Recovery
+    val totalRecovery: Long
         get() = if (totalRecoveryMillis == null || totalRecoveryMillis == 0L) DefaultTotalRecoveryTime else totalRecoveryMillis
 }
 
