@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Muscle Fatigue Tracker"
 include(":androidApp")
+include(":shared")
