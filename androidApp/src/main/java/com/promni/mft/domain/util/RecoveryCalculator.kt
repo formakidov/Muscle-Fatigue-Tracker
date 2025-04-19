@@ -1,6 +1,7 @@
 package com.promni.mft.domain.util
 
 import com.promni.mft.data.local.entities.Recovery
+import kotlin.math.exp
 
 object RecoveryCalculator {
 
@@ -12,6 +13,38 @@ object RecoveryCalculator {
     fun calculateCurrentFatigue(expectedRecoveryTimestamp: Long?, totalRecoveryTime: Recovery): Float {
         if (expectedRecoveryTimestamp == null) return 0f
         return (100f * (expectedRecoveryTimestamp - System.currentTimeMillis()) / totalRecoveryTime).coerceIn(0f, 100f)
+    }
+
+    /*
+
+    f(t) = L / (1 + e^(-k(t - t0)))
+
+    Where:
+    *   `f(t)`:  The fatigue level (0 to 100) at time `t`.  *Lower value = more recovered*.  This is the opposite of your current function, where 100 is fully recovered. We will adjust this.
+    *   `fatigue`: The maximum value of the curve (the fatigue level at the start of recovery).
+    *   `k`: The growth rate (steepness of the curve). Higher `k` means faster recovery.
+    *   `t0`: The time of the midpoint of the recovery curve (the inflection point).  This represents the time at which recovery is 50% complete.
+    *   `t`: The current time.
+    *   `e`: The base of the natural logarithm (approximately 2.71828).
+    */
+
+    fun calculateCurrentFatigueSigmoid(
+        fatigue: Float,
+        expectedRecoveryTimestamp: Long,
+        totalRecoveryTime: Long,
+        steepness: Double = 1.0, // Higher value = faster recovery.
+    ): Float {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime >= expectedRecoveryTimestamp) return 0f // Fully recovered
+
+        val t0 = expectedRecoveryTimestamp - totalRecoveryTime / 2.0 // Midpoint of recovery
+        val t = currentTime.toDouble()
+        val k = steepness * (12.0 / totalRecoveryTime) // Scale k to be relative to total recovery Time
+
+        // Apply the logistic function
+        val fatigue = fatigue / (1 + exp(-k * (t - t0)))
+
+        return fatigue.toFloat().coerceIn(0f, 100f)
     }
 
     /**

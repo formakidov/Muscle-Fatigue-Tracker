@@ -20,4 +20,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Muscle Fatigue Tracker"
-include(":app")
+include(":androidApp")
