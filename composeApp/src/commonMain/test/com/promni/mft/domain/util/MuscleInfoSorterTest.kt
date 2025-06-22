@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
+// todo migrate mockk to KMP-ready mocking library
 @ExtendWith(MockKExtension::class)
 class MuscleInfoSorterTest {
     @MockK

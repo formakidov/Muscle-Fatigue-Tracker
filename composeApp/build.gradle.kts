@@ -51,7 +51,12 @@ kotlin {
 //    }
     
     sourceSets {
-        val desktopMain by getting
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.koin.test)
+//            implementation(libs.koin.test.junit)
+        }
 
         androidMain.dependencies {
             implementation(compose.preview)
@@ -77,6 +82,8 @@ kotlin {
             implementation(libs.sqlite.bundled)
             implementation(libs.material3.windowsizeclass)
         }
+
+        val desktopMain by getting
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
@@ -85,6 +92,7 @@ kotlin {
     room {
         schemaDirectory("$projectDir/schemas")
     }
+
 }
 
 android {

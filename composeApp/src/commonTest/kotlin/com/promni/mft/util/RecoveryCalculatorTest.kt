@@ -1,9 +1,9 @@
-package com.promni.mft.domain.util
+package com.promni.mft.util
 
 import com.promni.mft.domain.util.RecoveryCalculator.calculateNewExpectedRecovery
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
-import java.time.Instant
+import kotlinx.datetime.Clock
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class RecoveryCalculatorTest {
 
@@ -11,7 +11,7 @@ class RecoveryCalculatorTest {
 
     @Test
     fun `case 1 - user increases total recovery time`() {
-        val now = Instant.now().toEpochMilli()
+        val now = Clock.System.now().toEpochMilliseconds()
 
         val currentTotalRecoveryTimePeriod = 4 * oneDayMillis // 4 days
         val daysPast = 1
@@ -31,7 +31,7 @@ class RecoveryCalculatorTest {
 
     @Test
     fun `case 2 - user decreases total recovery time`() {
-        val now = Instant.now().toEpochMilli()
+        val now = Clock.System.now().toEpochMilliseconds()
 
         val currentTotalRecoveryTimePeriod = 4 * oneDayMillis // 4 days
         val daysPast = 1
@@ -51,7 +51,7 @@ class RecoveryCalculatorTest {
 
     @Test
     fun `case 2_1 - user decreases total recovery time, recovery has just completed`() {
-        val now = Instant.now().toEpochMilli()
+        val now = Clock.System.now().toEpochMilliseconds()
 
         val currentTotalRecoveryTimePeriod = 4 * oneDayMillis // 4 days
         val daysPast = 1
@@ -71,7 +71,7 @@ class RecoveryCalculatorTest {
 
     @Test
     fun `case 2_2 - user decreases total recovery time, recovery has completed in the past`() {
-        val now = Instant.now().toEpochMilli()
+        val now = Clock.System.now().toEpochMilliseconds()
 
         val currentTotalRecoveryTimePeriod = 4 * oneDayMillis // 4 days
         val daysPast = 2
