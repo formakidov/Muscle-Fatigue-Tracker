@@ -60,6 +60,14 @@ fun MuscleDetailsBottomSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            FatigueChart(
+                modifier = Modifier
+                    .height(250.dp),
+                logs = logs
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             var isExpanded by rememberSaveable { mutableStateOf(false) }
             ExpandableContainer(
                 modifier = Modifier
@@ -103,7 +111,7 @@ private fun FatigueLogsHeader(isExpanded: Boolean) {
 }
 
 @Composable
-private fun FatigueLogs(modifier: Modifier, logs: List<FatigueLog>) {
+private fun FatigueLogs(modifier: Modifier = Modifier, logs: List<FatigueLog>) {
     if (logs.isEmpty()) {
         Text(modifier = modifier, text = "No logs yet")
     } else {

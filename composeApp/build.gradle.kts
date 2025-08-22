@@ -81,6 +81,7 @@ kotlin {
             implementation(libs.androidx.room.runtime)
             implementation(libs.sqlite.bundled)
             implementation(libs.material3.windowsizeclass)
+            implementation(libs.koalaplot.core)
         }
 
         val desktopMain by getting
