@@ -60,7 +60,8 @@ private val prepopulationCallback = object : RoomDatabase.Callback() {
         super.onCreate(connection)
         val sqlBuilder = StringBuilder("INSERT INTO muscles (id, name, totalRecoveryMillis) VALUES ")
         for ((index, muscle) in defaultMusclesNames.withIndex()) {
-            sqlBuilder.append("($index, '$muscle', NULL)")
+            // Use "index + 1" to start IDs from 1. An ID of 0 can cause issues with some database operations like updates.
+            sqlBuilder.append("(${index + 1}, '$muscle', NULL)")
             if (index < defaultMusclesNames.size - 1) {
                 sqlBuilder.append(", ")
             }
