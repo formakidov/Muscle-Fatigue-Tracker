@@ -109,7 +109,7 @@ fun MusclesContent(musclesInfo: List<MuscleInfo>, onMuscleSelected: (id: MuscleI
     val windowSizeClass = getWindowSizeClass()
     val widthSizeClass = windowSizeClass.widthSizeClass
     val contentPadding = PaddingValues(16.dp)
-    val itemSpacing = 16.dp
+    val itemSpacing = 12.dp
 
     val columnsCount = when (widthSizeClass) {
         WindowWidthSizeClass.Medium -> 2
@@ -131,8 +131,48 @@ fun MusclesContent(musclesInfo: List<MuscleInfo>, onMuscleSelected: (id: MuscleI
     }
 }
 
+
 @Preview
 @Composable
-fun MusclesContentPreview() {
-    MusclesContent(musclesInfo = allMuscles) {}
+private fun MuscleListScreenViewModelPreview() {
+    MuscleListScreen()
+}
+
+@Preview
+@Composable
+private fun MuscleListScreenSuccessPreview() {
+    MuscleListScreen(
+        modifier = Modifier,
+        uiState = MuscleUiState.Success(allMuscles),
+        fatigueLogUiState = FatigueLogUiState.Success(emptyList()),
+        selectedMuscleId = null,
+        onMuscleSelected = {},
+        onFatigueChanged = { _, _ -> },
+    )
+}
+
+@Preview
+@Composable
+private fun MuscleListScreenLoadingPreview() {
+    MuscleListScreen(
+        modifier = Modifier,
+        uiState = MuscleUiState.Loading,
+        fatigueLogUiState = FatigueLogUiState.Loading,
+        selectedMuscleId = null,
+        onMuscleSelected = {},
+        onFatigueChanged = { _, _ -> },
+    )
+}
+
+@Preview
+@Composable
+private fun MuscleListScreenErrorPreview() {
+    MuscleListScreen(
+        modifier = Modifier,
+        uiState = MuscleUiState.Error(Exception("Preview Error")),
+        fatigueLogUiState = FatigueLogUiState.Loading,
+        selectedMuscleId = null,
+        onMuscleSelected = {},
+        onFatigueChanged = { _, _ -> },
+    )
 }

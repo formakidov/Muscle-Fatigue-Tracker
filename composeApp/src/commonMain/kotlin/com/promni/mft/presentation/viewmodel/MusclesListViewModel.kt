@@ -66,7 +66,7 @@ class MusclesListViewModel(
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-private fun MusclesListViewModel.fatigueLogUiState(
+private fun fatigueLogUiState(
     selectedMuscleId: MutableStateFlow<MuscleId?>,
     getFatigueLogsUseCase: GetFatigueLogsUseCase
 ): Flow<FatigueLogUiState> = selectedMuscleId
@@ -86,7 +86,7 @@ private fun MusclesListViewModel.fatigueLogUiState(
         }
     }
 
-private fun MusclesListViewModel.muscleUiState(getMuscleInfoUseCase: GetMuscleInfoUseCase): Flow<MuscleUiState> =
+private fun muscleUiState(getMuscleInfoUseCase: GetMuscleInfoUseCase): Flow<MuscleUiState> =
     getMuscleInfoUseCase()
         .asResult()
         .map { result ->

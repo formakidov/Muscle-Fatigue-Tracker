@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -44,13 +43,12 @@ fun MuscleItem(
     val backgroundGradient = getFatigueGradient(muscleInfo.fatigue)
 
     Box(
-        modifier = Modifier.Companion
+        modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 70.dp)
             .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp))
             .background(brush = backgroundGradient, shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
             .clickable { onClick() }
-            .padding(24.dp)
+            .padding(12.dp)
             .animateContentSize(),
     ) {
         Row(verticalAlignment = CenterVertically) {
@@ -62,22 +60,22 @@ fun MuscleItem(
                         .padding(4.dp),
                     contentDescription = null
                 )
-                Spacer(modifier = Modifier.width(24.dp))
+                Spacer(modifier = Modifier.width(16.dp))
             }
             Column {
                 Text(
                     text = muscleInfo.muscle.name,
-                    color = Color.Companion.White,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Companion.Bold,
+                    color = Color.White,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
                 )
 
                 if (muscleInfo.fatigue > 0 && muscleInfo.expectedRecovery > 0) {
-                    Spacer(modifier = Modifier.Companion.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Recovered in: ${formatRemainingTime(muscleInfo.expectedRecovery)}",
-                        color = Color.Companion.White.copy(alpha = 0.9f),
-                        fontSize = 18.sp
+                        text = "Recovery in: ${formatRemainingTime(muscleInfo.expectedRecovery)}",
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 16.sp
                     )
                 }
             }
