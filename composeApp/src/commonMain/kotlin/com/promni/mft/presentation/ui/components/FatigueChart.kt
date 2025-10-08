@@ -1,11 +1,25 @@
 package com.promni.mft.presentation.ui.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -21,12 +35,11 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.daysUntil
+import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
@@ -35,6 +48,12 @@ fun FatigueChart(modifier: Modifier = Modifier, logs: List<FatigueLog>) {
         return
     }
 
+    var selectedDate by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+
+    val startOfWeek = selectedDate.minus(selectedDate.dayOfWeek.ordinal, DateTimeUnit.DAY)
+    val endOfWeek = startOfWeek.plus(6, DateTimeUnit.DAY)
+
     val fatigueByDay = logs.groupBy {
         Instant.fromEpochMilliseconds(it.timestamp)
             .toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -42,45 +61,62 @@ fun FatigueChart(modifier: Modifier = Modifier, logs: List<FatigueLog>) {
         logs.maxByOrNull { it.value }?.value ?: 0f
     }
 
-    val minDate = fatigueByDay.keys.minOrNull() ?: return
-    val lastLogDate = fatigueByDay.keys.maxOrNull() ?: return
-    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-    val maxDate = if (lastLogDate > today) lastLogDate else today
-    val days = minDate.daysUntil(maxDate)
+    val weekDates = (0..6).map { startOfWeek.plus(it, DateTimeUnit.DAY) }
+    val categories = weekDates.map {
+        val dayOfWeek = it.dayOfWeek.name.substring(0, 3)
+        val date = "${it.dayOfMonth.toString().padStart(2, '0')}.${it.monthNumber.toString().padStart(2, '0')}"
+        "$dayOfWeek\n$date"
+    }
+    val data = weekDates.map { fatigueByDay[it] ?: 0f }
 
-    val allDates = (0..days).map { minDate.plus(it, DateTimeUnit.DAY) }
-
-    val categories = allDates.map { "${it.month.name.substring(0, 3)} ${it.dayOfMonth}" }.reversed()
-    val data = allDates.map { fatigueByDay[it] ?: 0f }.reversed()
-
-    val scrollState = rememberScrollState()
-
-    XYGraph(
-        modifier = modifier.horizontalScroll(scrollState)
-            .width((categories.size * 56).dp),
-        xAxisModel = CategoryAxisModel(categories),
-        yAxisModel = rememberFloatLinearAxisModel(
-            range = 0f..100f,
-            minorTickCount = 0
-        ),
-    ) {
-        VerticalBarPlot(
-            xData = categories,
-            yData = data,
-            bar = { index ->
-                val fatigueValue = data[index]
-                if (fatigueValue > 0f) {
-                    val (darkerColor, lighterColor) = getFatigueColors(fatigueValue)
-                    DefaultVerticalBar(
-                        color = lighterColor,
-                        shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
-                        border = BorderStroke(1.dp, darkerColor)
-                    )
-                }
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { selectedDate = selectedDate.minus(7, DateTimeUnit.DAY) }) {
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Previous Week")
             }
-        )
+            Text(
+                text = "${startOfWeek.dayOfMonth}.${startOfWeek.monthNumber} - ${endOfWeek.dayOfMonth}.${endOfWeek.monthNumber}",
+                style = MaterialTheme.typography.titleMedium
+            )
+            IconButton(
+                onClick = { selectedDate = selectedDate.plus(7, DateTimeUnit.DAY) },
+                enabled = endOfWeek < today
+            ) {
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Next Week")
+            }
+        }
+
+        XYGraph(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            xAxisModel = CategoryAxisModel(categories),
+            yAxisModel = rememberFloatLinearAxisModel(
+                range = 0f..100f,
+                minorTickCount = 0
+            ),
+        ) {
+            VerticalBarPlot(
+                xData = categories,
+                yData = data,
+                bar = { index ->
+                    val fatigueValue = data[index]
+                    if (fatigueValue > 0f) {
+                        val (darkerColor, lighterColor) = getFatigueColors(fatigueValue)
+                        DefaultVerticalBar(
+                            color = lighterColor,
+                            shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
+                            border = BorderStroke(1.dp, darkerColor),
+                        )
+                    }
+                }
+            )
+        }
     }
 }
+
 
 private fun getFatigueColors(fatigue: Float): Pair<Color, Color> {
     val colorStart: Color
@@ -120,10 +156,10 @@ private fun FatigueChartEmptyPreview() {
 @Composable
 private fun FatigueChartPreview() {
     val logs = listOf(
-        FatigueLog(timestamp = 1704067200000L, value = 20f, muscleId = 1, id = 0), // 2024-01-01
-        FatigueLog(timestamp = 1704153600000L, value = 50f, muscleId = 1, id = 1), // 2024-01-02
-        FatigueLog(timestamp = 1704153700000L, value = 55f, muscleId = 1, id = 2), // 2024-01-02 (max is 60)
-        FatigueLog(timestamp = 1704240000000L, value = 80f, muscleId = 1, id = 3)  // 2024-01-03
+        FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds(), value = 20f, muscleId = 1, id = 0),
+        FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - 86400000, value = 50f, muscleId = 1, id = 1),
+        FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - 86400000, value = 55f, muscleId = 1, id = 2),
+        FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - (2 * 86400000), value = 80f, muscleId = 1, id = 3)
     )
     AppTheme(darkTheme = true, dynamicColor = false) {
         FatigueChart(
@@ -136,8 +172,8 @@ private fun FatigueChartPreview() {
 @Composable
 private fun FatigueChartWithGapsPreview() {
     val logs = listOf(
-        FatigueLog(timestamp = 1704067200000L, value = 20f, muscleId = 1, id = 0), // 2024-01-01
-        FatigueLog(timestamp = 1704240000000L, value = 80f, muscleId = 1, id = 3)  // 2024-01-03
+        FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds(), value = 20f, muscleId = 1, id = 0),
+        FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - (2 * 86400000), value = 80f, muscleId = 1, id = 3)
     )
     AppTheme(darkTheme = true, dynamicColor = false) {
         FatigueChart(
@@ -153,7 +189,7 @@ private fun FatigueChartLongPreview() {
         for (i in 1..20) {
             add(
                 FatigueLog(
-                    timestamp = 1704067200000L + (i * 86400000L),
+                    timestamp = Clock.System.now().toEpochMilliseconds() - (i * 86400000L),
                     value = (i * 5).toFloat(),
                     muscleId = 1,
                     id = i.toLong()
