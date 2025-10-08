@@ -41,13 +41,22 @@ fun MuscleDetailsBottomSheet(
     logs: List<FatigueLog>,
     onDismiss: () -> Unit,
     onFatigueChanged: (MuscleInfo, newValue: Float) -> Unit,
+    onRecoveryPeriodChanged: (MuscleInfo, Int) -> Unit
 ) {
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            OverviewInfo(muscleInfo)
+        Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 0.dp)) {
+
+            Text(text = muscleInfo.muscle.name, style = MaterialTheme.typography.headlineLarge)
+
+            EditableRecoveryPeriod(
+                modifier = Modifier.padding(vertical = 8.dp),
+                muscleInfo = muscleInfo
+            ) { days -> onRecoveryPeriodChanged(muscleInfo, days) }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            Text(text = "Slide to set how tired your muscle is right now:", style = MaterialTheme.typography.bodyMedium)
 
             var fatigueSliderValue by remember { mutableFloatStateOf(muscleInfo.fatigue / 100f) }
             Slider(
@@ -84,16 +93,6 @@ fun MuscleDetailsBottomSheet(
 
         }
     }
-}
-
-@Composable
-private fun OverviewInfo(muscleInfo: MuscleInfo) {
-    Text(text = muscleInfo.muscle.name, style = MaterialTheme.typography.headlineLarge)
-    Text(text = "Fatigue: ${muscleInfo.fatigue.toInt()}%", fontSize = 18.sp)
-    Text(
-        text = "Total Recovery Period: ${muscleInfo.totalRecoveryTime / (24 * 60 * 60 * 1000)} days",
-        fontSize = 16.sp
-    )
 }
 
 @Composable

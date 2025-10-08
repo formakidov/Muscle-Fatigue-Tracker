@@ -45,6 +45,7 @@ fun MuscleListScreen(
         selectedMuscleId = selectedMuscleId,
         onMuscleSelected = viewModel::selectMuscle,
         onFatigueChanged = viewModel::setFatigue,
+        onRecoveryPeriodChanged = viewModel::setRecoveryPeriod
     )
 }
 
@@ -57,6 +58,7 @@ fun MuscleListScreen(
     selectedMuscleId: MuscleId?,
     onMuscleSelected: (MuscleId) -> Unit,
     onFatigueChanged: (MuscleInfo, newValue: Float) -> Unit,
+    onRecoveryPeriodChanged: (MuscleInfo, Int) -> Unit
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     Box(
@@ -97,6 +99,7 @@ fun MuscleListScreen(
                             onFatigueChanged(muscleInfo, newValue)
                             showBottomSheet = false
                         },
+                        onRecoveryPeriodChanged = onRecoveryPeriodChanged
                     )
                 }
             }
@@ -148,6 +151,7 @@ private fun MuscleListScreenSuccessPreview() {
         selectedMuscleId = null,
         onMuscleSelected = {},
         onFatigueChanged = { _, _ -> },
+        onRecoveryPeriodChanged = { _, _ -> }
     )
 }
 
@@ -161,6 +165,7 @@ private fun MuscleListScreenLoadingPreview() {
         selectedMuscleId = null,
         onMuscleSelected = {},
         onFatigueChanged = { _, _ -> },
+        onRecoveryPeriodChanged = { _, _ -> }
     )
 }
 
@@ -174,5 +179,6 @@ private fun MuscleListScreenErrorPreview() {
         selectedMuscleId = null,
         onMuscleSelected = {},
         onFatigueChanged = { _, _ -> },
+        onRecoveryPeriodChanged = { _, _ -> }
     )
 }

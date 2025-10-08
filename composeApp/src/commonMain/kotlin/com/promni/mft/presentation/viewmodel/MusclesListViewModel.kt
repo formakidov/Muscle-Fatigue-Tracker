@@ -58,7 +58,12 @@ class MusclesListViewModel(
         }
     }
 
-    fun setTotalRecoveryTime(muscleId: MuscleId, newTotalRecoveryTime: Recovery) {
+    fun setRecoveryPeriod(muscleInfo: MuscleInfo, days: Int) {
+        val newTotalRecoveryTime = days * 24 * 60 * 60 * 1000L
+        setTotalRecoveryTime(muscleInfo.muscle.id, newTotalRecoveryTime)
+    }
+
+    private fun setTotalRecoveryTime(muscleId: MuscleId, newTotalRecoveryTime: Recovery) {
         viewModelScope.launch {
             setTotalRecoveryTimeUseCase(muscleId, newTotalRecoveryTime)
         }
