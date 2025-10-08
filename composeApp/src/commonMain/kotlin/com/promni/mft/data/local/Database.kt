@@ -58,15 +58,24 @@ fun getDatabase(
 private val prepopulationCallback = object : RoomDatabase.Callback() {
     override fun onCreate(connection: SQLiteConnection) {
         super.onCreate(connection)
-        val sqlBuilder = StringBuilder("INSERT INTO muscles (id, name, totalRecoveryMillis) VALUES ")
-        for ((index, muscle) in defaultMusclesNames.withIndex()) {
-            // Use "index + 1" to start IDs from 1. An ID of 0 can cause issues with some database operations like updates.
-            sqlBuilder.append("(${index + 1}, '$muscle', NULL)")
-            if (index < defaultMusclesNames.size - 1) {
-                sqlBuilder.append(", ")
-            }
+        getPrepopulationSql().forEach { sql ->
+            connection.execSQL(sql)
         }
-        sqlBuilder.append(";")
-        connection.execSQL(sql = sqlBuilder.toString())
     }
 }
+
+private fun getPrepopulationSql(): List<String> {
+    return listOf(
+        getMusclePrepopulationSql()
+    )
+}
+
+private fun getMusclePrepopulationSql() =
+    defaultMusclesNames.mapIndexed { index, muscle ->
+        // Use "index + 1" to start IDs from 1. An ID of 0 can cause issues with some database operations like updates.
+        "(${index + 1}, '$muscle', NULL)"
+    }.joinToString(
+        prefix = "INSERT INTO muscles (id, name, totalRecoveryMillis) VALUES ",
+        postfix = ";",
+        separator = ", "
+    )
