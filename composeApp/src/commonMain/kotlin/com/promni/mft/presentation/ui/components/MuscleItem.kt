@@ -1,7 +1,6 @@
 package com.promni.mft.presentation.ui.components
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,6 +33,7 @@ import com.promni.mft.presentation.ui.utils.muscleBiceps
 import com.promni.mft.presentation.ui.utils.muscleQuadriceps
 import com.promni.mft.presentation.ui.utils.muscleTriceps
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun MuscleItem(

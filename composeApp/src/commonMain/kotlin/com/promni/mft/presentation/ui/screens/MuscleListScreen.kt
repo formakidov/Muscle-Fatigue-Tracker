@@ -1,6 +1,5 @@
 package com.promni.mft.presentation.ui.screens
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,6 +26,7 @@ import com.promni.mft.presentation.ui.utils.getWindowSizeClass
 import com.promni.mft.presentation.viewmodel.FatigueLogUiState
 import com.promni.mft.presentation.viewmodel.MuscleUiState
 import com.promni.mft.presentation.viewmodel.MusclesListViewModel
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
