@@ -1,5 +1,6 @@
 package com.promni.mft.presentation.ui.utils
 
+import com.promni.mft.domain.model.FatigueLog
 import com.promni.mft.domain.model.Muscle
 import com.promni.mft.domain.model.MuscleInfo
 import com.promni.mft.domain.util.SystemTime
@@ -33,3 +34,22 @@ val muscleQuadricepsHardTrained = MuscleInfo(
 )
 
 val allMuscles = listOf(muscleAbsNotTrained, muscleBicepsEasyTrained, muscleTricepsMiddleTrained, muscleQuadricepsHardTrained)
+
+val fatigueLogs: List<FatigueLog>
+    get() {
+        val now = SystemTime.nowMillis()
+        val weekMillis = 7 * dayMillis
+
+        return listOf(
+            // This week
+            FatigueLog(id = 1, value = 25f, muscleId = muscleBicepsEasyTrained.muscle.id, timestamp = now - dayMillis),
+            FatigueLog(id = 2, value = 50f, muscleId = muscleTricepsMiddleTrained.muscle.id, timestamp = now - 2 * dayMillis),
+            FatigueLog(id = 3, value = 75f, muscleId = muscleQuadricepsHardTrained.muscle.id, timestamp = now - 4 * dayMillis),
+
+            // Previous week
+            FatigueLog(id = 4, value = 60f, muscleId = muscleTricepsMiddleTrained.muscle.id, timestamp = now - weekMillis - dayMillis),
+
+            // Before previous week
+            FatigueLog(id = 5, value = 80f, muscleId = muscleQuadricepsHardTrained.muscle.id, timestamp = now - 2 * weekMillis - 2 * dayMillis)
+        )
+    }

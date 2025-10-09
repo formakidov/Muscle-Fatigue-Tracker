@@ -9,8 +9,10 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,6 +57,7 @@ fun MuscleListScreen(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MuscleListScreen(
     modifier: Modifier,
@@ -66,6 +69,7 @@ fun MuscleListScreen(
     onRecoveryPeriodChanged: (MuscleInfo, Int) -> Unit
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     Box(modifier = modifier) {
         when (uiState) {
             is MuscleUiState.Loading -> {
@@ -108,6 +112,7 @@ fun MuscleListScreen(
 
                     MuscleDetailsBottomSheet(
                         muscleInfo = muscleInfo,
+                        sheetState = sheetState,
                         logs = logs,
                         onDismiss = { showBottomSheet = false },
                         onFatigueChanged = { muscleInfo, newValue ->
