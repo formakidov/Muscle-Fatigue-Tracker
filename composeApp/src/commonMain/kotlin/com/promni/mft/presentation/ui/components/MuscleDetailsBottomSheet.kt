@@ -42,7 +42,7 @@ fun MuscleDetailsBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
     ) {
-        MuscleDetailsBottomSheetContent(
+        MuscleDetailsContent(
             muscleInfo = muscleInfo,
             logs = logs,
             onFatigueChanged = onFatigueChanged,
@@ -52,7 +52,7 @@ fun MuscleDetailsBottomSheet(
 }
 
 @Composable
-private fun MuscleDetailsBottomSheetContent(
+private fun MuscleDetailsContent(
     muscleInfo: MuscleInfo,
     logs: List<FatigueLog>,
     onFatigueChanged: (MuscleInfo, Float) -> Unit,
@@ -84,7 +84,7 @@ private fun MuscleDetailsBottomSheetContent(
 
         FatigueChart(
             modifier = Modifier
-                .height(250.dp),
+                .height(300.dp),
             logs = logs
         )
     }

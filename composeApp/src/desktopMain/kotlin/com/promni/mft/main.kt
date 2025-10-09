@@ -10,7 +10,6 @@ fun main() = application {
     startKoin { modules(appModules()) }
     Window(
         onCloseRequest = ::exitApplication,
-        alwaysOnTop = true, // todo disable for PROD version
         title = "Muscle Fatigue Tracker",
     ) {
         App(
