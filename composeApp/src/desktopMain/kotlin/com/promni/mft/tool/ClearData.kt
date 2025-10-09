@@ -3,10 +3,6 @@ package com.promni.mft.tool
 import com.promni.mft.data.local.BASE_DB_NAME
 import java.io.File
 
-// This is a placeholder for the constant used in your main application.
-// IMPORTANT: You must find the actual value of `BASE_DB_NAME` in your project
-// and put it here.
-
 /**
  * A command-line utility to clear the application's database files.
  * This tool specifically targets the database location defined in `DatabaseBuilder.kt`.

@@ -7,8 +7,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.promni.mft.presentation.ui.theme.AppTheme
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
 /**
@@ -53,6 +61,86 @@ fun ExpandableContainer(
 
         expandTrigger?.let {
             it(isExpanded, onExpandedChange)
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ExpandableContainerLightPreview() {
+    AppTheme(darkTheme = false, dynamicColor = false) {
+        Surface {
+            var isExpanded by remember { mutableStateOf(false) }
+            ExpandableContainer(
+                isExpanded = isExpanded,
+                onExpandedChange = { isExpanded = !isExpanded },
+                expandedContent = {
+                    Text("This is the expanded content.")
+                }
+            ) {
+                Text(
+                    if (it) {
+                        "Content (Expanded)"
+                    } else {
+                        "Content (Collapsed)"
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ExpandableContainerPreview() {
+    AppTheme(darkTheme = true, dynamicColor = false) {
+        Surface {
+            var isExpanded by remember { mutableStateOf(false) }
+            ExpandableContainer(
+                isExpanded = isExpanded,
+                onExpandedChange = { isExpanded = !isExpanded },
+                expandedContent = {
+                    Text("This is the expanded content.")
+                }
+            ) {
+                Text(
+                    if (it) {
+                        "Content (Expanded)"
+                    } else {
+                        "Content (Collapsed)"
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ExpandableContainerExpandedLightPreview() {
+    AppTheme(darkTheme = false, dynamicColor = false) {
+        Surface {
+            var isExpanded by remember { mutableStateOf(true) }
+            ExpandableContainer(
+                isExpanded = isExpanded,
+                onExpandedChange = { isExpanded = !isExpanded },
+                expandedContent = { Text("This is the expanded content.") }
+            ) { Text("Content (Expanded)") }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ExpandableContainerExpandedPreview() {
+    AppTheme(darkTheme = true, dynamicColor = false) {
+        Surface {
+            var isExpanded by remember { mutableStateOf(true) }
+            ExpandableContainer(
+                isExpanded = isExpanded,
+                onExpandedChange = { isExpanded = !isExpanded },
+                expandedContent = { Text("This is the expanded content.") }
+            ) { Text("Content (Expanded)") }
         }
     }
 }
