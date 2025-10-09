@@ -65,82 +65,43 @@ fun ExpandableContainer(
     }
 }
 
-@Preview
 @Composable
-fun ExpandableContainerLightPreview() {
-    AppTheme(darkTheme = false, dynamicColor = false) {
+private fun ThemedExpandableContainerPreview(darkTheme: Boolean, isInitiallyExpanded: Boolean) {
+    AppTheme(darkTheme = darkTheme, dynamicColor = false) {
         Surface {
-            var isExpanded by remember { mutableStateOf(false) }
+            var isExpanded by remember { mutableStateOf(isInitiallyExpanded) }
             ExpandableContainer(
                 isExpanded = isExpanded,
                 onExpandedChange = { isExpanded = !isExpanded },
                 expandedContent = {
                     Text("This is the expanded content.")
+                },
+                content = { expanded ->
+                    Text(
+                        if (expanded) {
+                            "Content (Expanded)"
+                        } else {
+                            "Content (Collapsed)"
+                        }
+                    )
                 }
-            ) {
-                Text(
-                    if (it) {
-                        "Content (Expanded)"
-                    } else {
-                        "Content (Collapsed)"
-                    }
-                )
-            }
+            )
         }
     }
 }
 
-@Preview
+@Preview(name = "Collapsed Light")
 @Composable
-fun ExpandableContainerPreview() {
-    AppTheme(darkTheme = true, dynamicColor = false) {
-        Surface {
-            var isExpanded by remember { mutableStateOf(false) }
-            ExpandableContainer(
-                isExpanded = isExpanded,
-                onExpandedChange = { isExpanded = !isExpanded },
-                expandedContent = {
-                    Text("This is the expanded content.")
-                }
-            ) {
-                Text(
-                    if (it) {
-                        "Content (Expanded)"
-                    } else {
-                        "Content (Collapsed)"
-                    }
-                )
-            }
-        }
-    }
-}
+private fun ExpandableContainerCollapsedLightPreview() = ThemedExpandableContainerPreview(darkTheme = false, isInitiallyExpanded = false)
 
-@Preview
+@Preview(name = "Collapsed Dark")
 @Composable
-fun ExpandableContainerExpandedLightPreview() {
-    AppTheme(darkTheme = false, dynamicColor = false) {
-        Surface {
-            var isExpanded by remember { mutableStateOf(true) }
-            ExpandableContainer(
-                isExpanded = isExpanded,
-                onExpandedChange = { isExpanded = !isExpanded },
-                expandedContent = { Text("This is the expanded content.") }
-            ) { Text("Content (Expanded)") }
-        }
-    }
-}
+private fun ExpandableContainerCollapsedDarkPreview() = ThemedExpandableContainerPreview(darkTheme = true, isInitiallyExpanded = false)
 
-@Preview
+@Preview(name = "Expanded Light")
 @Composable
-fun ExpandableContainerExpandedPreview() {
-    AppTheme(darkTheme = true, dynamicColor = false) {
-        Surface {
-            var isExpanded by remember { mutableStateOf(true) }
-            ExpandableContainer(
-                isExpanded = isExpanded,
-                onExpandedChange = { isExpanded = !isExpanded },
-                expandedContent = { Text("This is the expanded content.") }
-            ) { Text("Content (Expanded)") }
-        }
-    }
-}
+private fun ExpandableContainerExpandedLightPreview() = ThemedExpandableContainerPreview(darkTheme = false, isInitiallyExpanded = true)
+
+@Preview(name = "Expanded Dark")
+@Composable
+private fun ExpandableContainerExpandedDarkPreview() = ThemedExpandableContainerPreview(darkTheme = true, isInitiallyExpanded = true)

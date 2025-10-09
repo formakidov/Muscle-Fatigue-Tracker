@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -142,64 +143,83 @@ private fun getFatigueColors(fatigue: Float): Pair<Color, Color> {
     return colorStart to colorEnd
 }
 
-@Preview
 @Composable
-private fun FatigueChartEmptyPreview() {
-    AppTheme(darkTheme = true, dynamicColor = false) {
-        FatigueChart(
-            logs = emptyList()
-        )
+private fun ThemedFatigueChartPreview(darkTheme: Boolean, logs: List<FatigueLog>) {
+    AppTheme(darkTheme = darkTheme, dynamicColor = false) {
+        Surface {
+            FatigueChart(
+                logs = logs
+            )
+        }
     }
 }
 
-@Preview
+@Preview(name = "Empty Light")
 @Composable
-private fun FatigueChartPreview() {
+private fun FatigueChartEmptyPreviewLight() {
+    ThemedFatigueChartPreview(darkTheme = false, logs = emptyList())
+}
+
+@Preview(name = "Empty Dark")
+@Composable
+private fun FatigueChartEmptyPreviewDark() {
+    ThemedFatigueChartPreview(darkTheme = true, logs = emptyList())
+}
+
+@Preview(name = "Light")
+@Composable
+private fun FatigueChartPreviewLight() {
     val logs = listOf(
         FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds(), value = 20f, muscleId = 1, id = 0),
         FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - 86400000, value = 50f, muscleId = 1, id = 1),
         FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - 86400000, value = 55f, muscleId = 1, id = 2),
         FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - (2 * 86400000), value = 80f, muscleId = 1, id = 3)
     )
-    AppTheme(darkTheme = true, dynamicColor = false) {
-        FatigueChart(
-            logs = logs
-        )
-    }
+    ThemedFatigueChartPreview(darkTheme = false, logs = logs)
 }
 
-@Preview
+@Preview(name = "Dark")
 @Composable
-private fun FatigueChartWithGapsPreview() {
+private fun FatigueChartPreviewDark() {
+    val logs = listOf(
+        FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds(), value = 20f, muscleId = 1, id = 0),
+        FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - 86400000, value = 50f, muscleId = 1, id = 1),
+        FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - 86400000, value = 55f, muscleId = 1, id = 2),
+        FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - (2 * 86400000), value = 80f, muscleId = 1, id = 3)
+    )
+    ThemedFatigueChartPreview(darkTheme = true, logs = logs)
+}
+
+@Preview(name = "With Gaps Light")
+@Composable
+private fun FatigueChartWithGapsPreviewLight() {
     val logs = listOf(
         FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds(), value = 20f, muscleId = 1, id = 0),
         FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - (2 * 86400000), value = 80f, muscleId = 1, id = 3)
     )
-    AppTheme(darkTheme = true, dynamicColor = false) {
-        FatigueChart(
-            logs = logs
-        )
-    }
+    ThemedFatigueChartPreview(darkTheme = false, logs = logs)
 }
 
-@Preview
+@Preview(name = "With Gaps Dark")
 @Composable
-private fun FatigueChartLongPreview() {
-    val logs = buildList {
-        for (i in 1..20) {
-            add(
-                FatigueLog(
-                    timestamp = Clock.System.now().toEpochMilliseconds() - (i * 86400000L),
-                    value = (i * 5).toFloat(),
-                    muscleId = 1,
-                    id = i.toLong()
-                )
-            )
-        }
-    }
-    AppTheme(darkTheme = true, dynamicColor = false) {
-        FatigueChart(
-            logs = logs
-        )
-    }
+private fun FatigueChartWithGapsPreviewDark() {
+    val logs = listOf(
+        FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds(), value = 20f, muscleId = 1, id = 0),
+        FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - (2 * 86400000), value = 80f, muscleId = 1, id = 3)
+    )
+    ThemedFatigueChartPreview(darkTheme = true, logs = logs)
+}
+
+@Preview(name = "Long Preview Light")
+@Composable
+private fun FatigueChartLongPreviewLight() {
+    val logs = buildList { for (i in 1..20) add(FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - (i * 86400000L), value = (i * 5).toFloat(), muscleId = 1, id = i.toLong())) }
+    ThemedFatigueChartPreview(darkTheme = false, logs = logs)
+}
+
+@Preview(name = "Long Preview Dark")
+@Composable
+private fun FatigueChartLongPreviewDark() {
+    val logs = buildList { for (i in 1..20) add(FatigueLog(timestamp = Clock.System.now().toEpochMilliseconds() - (i * 86400000L), value = (i * 5).toFloat(), muscleId = 1, id = i.toLong())) }
+    ThemedFatigueChartPreview(darkTheme = true, logs = logs)
 }

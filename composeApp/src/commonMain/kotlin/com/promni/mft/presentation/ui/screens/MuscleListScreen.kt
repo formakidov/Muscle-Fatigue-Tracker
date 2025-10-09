@@ -2,11 +2,14 @@ package com.promni.mft.presentation.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -14,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -21,12 +25,13 @@ import com.promni.mft.data.local.entities.MuscleId
 import com.promni.mft.domain.model.MuscleInfo
 import com.promni.mft.presentation.ui.components.MuscleDetailsBottomSheet
 import com.promni.mft.presentation.ui.components.MuscleItem
+import com.promni.mft.presentation.ui.theme.AppTheme
+import com.promni.mft.presentation.ui.utils.DevicePreviews
 import com.promni.mft.presentation.ui.utils.allMuscles
 import com.promni.mft.presentation.ui.utils.getWindowSizeClass
 import com.promni.mft.presentation.viewmodel.FatigueLogUiState
 import com.promni.mft.presentation.viewmodel.MuscleUiState
 import com.promni.mft.presentation.viewmodel.MusclesListViewModel
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -54,23 +59,33 @@ fun MuscleListScreen(
 fun MuscleListScreen(
     modifier: Modifier,
     uiState: MuscleUiState,
-    fatigueLogUiState: FatigueLogUiState,
+    fatigueLogUiState: FatigueLogUiState = FatigueLogUiState.Loading,
     selectedMuscleId: MuscleId?,
     onMuscleSelected: (MuscleId) -> Unit,
     onFatigueChanged: (MuscleInfo, newValue: Float) -> Unit,
     onRecoveryPeriodChanged: (MuscleInfo, Int) -> Unit
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
-    Box(
-        modifier = modifier,
-    ) {
+    Box(modifier = modifier) {
         when (uiState) {
             is MuscleUiState.Loading -> {
-                CircularProgressIndicator()
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
 
             is MuscleUiState.Error -> {
-                Text("Error loading muscles" + uiState.exception)
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Error loading muscles")
+                    Text(uiState.exception.toString())
+                }
             }
 
             is MuscleUiState.Success -> {
@@ -135,50 +150,62 @@ fun MusclesContent(musclesInfo: List<MuscleInfo>, onMuscleSelected: (id: MuscleI
 }
 
 
-@Preview
 @Composable
-private fun MuscleListScreenViewModelPreview() {
-    MuscleListScreen()
+private fun ThemedMuscleListScreenPreview(
+    darkTheme: Boolean,
+    uiState: MuscleUiState,
+    fatigueLogUiState: FatigueLogUiState = FatigueLogUiState.Loading,
+    modifier: Modifier = Modifier
+) {
+    AppTheme(darkTheme = darkTheme, dynamicColor = false) {
+        Surface {
+            MuscleListScreen(
+                modifier = modifier,
+                uiState = uiState,
+                fatigueLogUiState = fatigueLogUiState,
+                selectedMuscleId = null,
+                onMuscleSelected = {},
+                onFatigueChanged = { _, _ -> },
+                onRecoveryPeriodChanged = { _, _ -> }
+            )
+        }
+    }
 }
 
-@Preview
+@DevicePreviews
 @Composable
-private fun MuscleListScreenSuccessPreview() {
-    MuscleListScreen(
-        modifier = Modifier,
-        uiState = MuscleUiState.Success(allMuscles),
-        fatigueLogUiState = FatigueLogUiState.Success(emptyList()),
-        selectedMuscleId = null,
-        onMuscleSelected = {},
-        onFatigueChanged = { _, _ -> },
-        onRecoveryPeriodChanged = { _, _ -> }
-    )
-}
+private fun MuscleListScreenSuccessLightPreview() = ThemedMuscleListScreenPreview(
+    darkTheme = false,
+    uiState = MuscleUiState.Success(allMuscles),
+    fatigueLogUiState = FatigueLogUiState.Success(emptyList())
+)
 
-@Preview
+@DevicePreviews
 @Composable
-private fun MuscleListScreenLoadingPreview() {
-    MuscleListScreen(
-        modifier = Modifier,
-        uiState = MuscleUiState.Loading,
-        fatigueLogUiState = FatigueLogUiState.Loading,
-        selectedMuscleId = null,
-        onMuscleSelected = {},
-        onFatigueChanged = { _, _ -> },
-        onRecoveryPeriodChanged = { _, _ -> }
-    )
-}
+private fun MuscleListScreenSuccessDarkPreview() = ThemedMuscleListScreenPreview(
+    darkTheme = true,
+    uiState = MuscleUiState.Success(allMuscles),
+    fatigueLogUiState = FatigueLogUiState.Success(emptyList())
+)
 
-@Preview
+@DevicePreviews
 @Composable
-private fun MuscleListScreenErrorPreview() {
-    MuscleListScreen(
-        modifier = Modifier,
-        uiState = MuscleUiState.Error(Exception("Preview Error")),
-        fatigueLogUiState = FatigueLogUiState.Loading,
-        selectedMuscleId = null,
-        onMuscleSelected = {},
-        onFatigueChanged = { _, _ -> },
-        onRecoveryPeriodChanged = { _, _ -> }
-    )
-}
+private fun MuscleListScreenLoadingLightPreview() =
+    ThemedMuscleListScreenPreview(darkTheme = false, uiState = MuscleUiState.Loading)
+
+@DevicePreviews
+@Composable
+private fun MuscleListScreenLoadingDarkPreview() =
+    ThemedMuscleListScreenPreview(darkTheme = true, uiState = MuscleUiState.Loading)
+
+@DevicePreviews
+@Composable
+private fun MuscleListScreenErrorLightPreview() = ThemedMuscleListScreenPreview(
+    darkTheme = false, uiState = MuscleUiState.Error(Exception("Preview Error"))
+)
+
+@DevicePreviews
+@Composable
+private fun MuscleListScreenErrorDarkPreview() = ThemedMuscleListScreenPreview(
+    darkTheme = true, uiState = MuscleUiState.Error(Exception("Preview Error"))
+)
