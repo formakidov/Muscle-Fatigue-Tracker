@@ -85,8 +85,7 @@ fun FatigueChart(
     val weekDates = (0..6).map { startOfWeek.plus(it, DateTimeUnit.DAY) }
     val categories = weekDates.map {
         val dayOfWeek = it.dayOfWeek.name.substring(0, 3)
-        val date = "${it.dayOfMonth.toString().padStart(2, '0')}.${it.monthNumber.toString().padStart(2, '0')}"
-        "$dayOfWeek\n$date"
+        "$dayOfWeek\n${it.dayOfMonth}"
     }
     val data = weekDates.map { fatigueByDay[it] ?: 0f }
 

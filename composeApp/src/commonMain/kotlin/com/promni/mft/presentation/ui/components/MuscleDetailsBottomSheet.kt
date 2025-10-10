@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -81,7 +83,10 @@ private fun MuscleDetailsContent(
     onRecoveryPeriodChanged: (Int) -> Unit,
     onDeleteLog: (LocalDate) -> Unit,
 ) {
-    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 0.dp)) {
+    Column(
+        modifier = Modifier.verticalScroll(rememberScrollState())
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 0.dp)
+    ) {
 
         Text(text = muscleInfo.muscle.name, style = MaterialTheme.typography.headlineLarge)
 

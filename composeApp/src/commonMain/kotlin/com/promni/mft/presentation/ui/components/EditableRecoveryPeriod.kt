@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
@@ -75,11 +76,17 @@ fun EditableRecoveryPeriod(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
+                modifier = Modifier.weight(1f, fill = true),
                 text = "Recovery Period: ${muscleInfo.totalRecoveryTime / (24 * 60 * 60 * 1000)} days",
                 fontSize = 16.sp
             )
-            Spacer(modifier = Modifier.weight(1f))
-            FilledTonalButton(onClick = { isEditing = true }) { Text(text = "Change") }
+            Spacer(modifier = Modifier.padding(start = 8.dp))
+            FilledTonalButton(
+                modifier = Modifier.widthIn(min = 90.dp),
+                onClick = { isEditing = true }
+            ) {
+                Text(text = "Change")
+            }
         }
     }
 }
