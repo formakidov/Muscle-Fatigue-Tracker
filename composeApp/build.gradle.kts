@@ -83,6 +83,8 @@ kotlin {
             implementation(libs.sqlite.bundled)
             implementation(libs.material3.windowsizeclass)
             implementation(libs.koalaplot.core)
+            implementation(libs.androidx.datastore)
+            implementation(libs.androidx.datastore.preferences)
         }
 
         val desktopMain by getting

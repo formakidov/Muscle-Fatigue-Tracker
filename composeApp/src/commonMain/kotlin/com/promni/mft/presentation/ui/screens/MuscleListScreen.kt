@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -21,9 +23,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.promni.mft.domain.model.MuscleInfo
+import com.promni.mft.domain.repository.MuscleFilter
+import com.promni.mft.presentation.ui.components.FilterSegmentedButton
 import com.promni.mft.presentation.ui.components.MuscleDetailsBottomSheet
 import com.promni.mft.presentation.ui.components.MuscleItem
 import com.promni.mft.presentation.ui.theme.AppTheme
@@ -40,10 +46,13 @@ fun MuscleListScreen(
     viewModel: MusclesListViewModel = koinViewModel()
 ) {
     val muscleUiState by viewModel.muscleUiState.collectAsStateWithLifecycle()
+    val muscleFilter by viewModel.muscleFilter.collectAsStateWithLifecycle()
 
     MuscleListScreen(
-        modifier,
+        modifier = modifier,
         uiState = muscleUiState,
+        muscleFilter = muscleFilter,
+        onFilterSelected = viewModel::setMuscleFilter
     )
 }
 
@@ -53,11 +62,16 @@ fun MuscleListScreen(
 fun MuscleListScreen(
     modifier: Modifier,
     uiState: MuscleUiState,
+    muscleFilter: MuscleFilter,
+    onFilterSelected: (MuscleFilter) -> Unit
 ) {
     var selectedMuscleId by remember { mutableStateOf<Long?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    Box(modifier = modifier) {
+    val density = LocalDensity.current
+    var filterHeight by remember { mutableStateOf(0.dp) }
+
+    Box(modifier = modifier.fillMaxSize()) {
         when (uiState) {
             is MuscleUiState.Loading -> {
                 Box(
@@ -82,11 +96,18 @@ fun MuscleListScreen(
             is MuscleUiState.Success -> {
                 val musclesInfo = uiState.musclesInfo
                 if (musclesInfo.isEmpty()) {
-                    Text("No muscles found")
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No muscles found for this filter.")
+                    }
                 } else {
-                    MusclesListContent(musclesInfo, onMuscleSelected = {
-                        selectedMuscleId = it.muscle.id
-                    })
+                    MusclesListContent(
+                        musclesInfo = musclesInfo,
+                        onMuscleSelected = { selectedMuscleId = it.muscle.id },
+                        contentPadding = PaddingValues(bottom = filterHeight + 32.dp, start = 16.dp, end = 16.dp, top = 16.dp)
+                    )
                 }
 
                 val selectedMuscle = selectedMuscleId?.let { id ->
@@ -102,14 +123,31 @@ fun MuscleListScreen(
                 }
             }
         }
+
+        FilterSegmentedButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
+                .onSizeChanged {
+                    with(density) {
+                        filterHeight = it.height.toDp()
+                    }
+                },
+            selectedFilter = muscleFilter,
+            onFilterSelected = onFilterSelected
+        )
     }
 }
 
 @Composable
-fun MusclesListContent(musclesInfo: List<MuscleInfo>, onMuscleSelected: (muscle: MuscleInfo) -> Unit) {
+fun MusclesListContent(
+    musclesInfo: List<MuscleInfo>,
+    onMuscleSelected: (muscle: MuscleInfo) -> Unit,
+    contentPadding: PaddingValues,
+) {
     val windowSizeClass = getWindowSizeClass()
     val widthSizeClass = windowSizeClass.widthSizeClass
-    val contentPadding = PaddingValues(16.dp)
     val itemSpacing = 12.dp
 
     val columnsCount = when (widthSizeClass) {
@@ -144,6 +182,8 @@ private fun ThemedMuscleListScreenPreview(
             MuscleListScreen(
                 modifier = modifier,
                 uiState = uiState,
+                muscleFilter = MuscleFilter.ALL,
+                onFilterSelected = {}
             )
         }
     }
