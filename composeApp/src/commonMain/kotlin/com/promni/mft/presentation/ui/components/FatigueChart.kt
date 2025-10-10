@@ -79,7 +79,7 @@ fun FatigueChart(
         Instant.fromEpochMilliseconds(it.timestamp)
             .toLocalDateTime(TimeZone.currentSystemDefault()).date
     }.mapValues { (_, logs) ->
-        logs.maxByOrNull { it.value }?.value ?: 0f
+        logs.maxByOrNull { it.timestamp }?.value ?: 0f
     }
 
     val weekDates = (0..6).map { startOfWeek.plus(it, DateTimeUnit.DAY) }
