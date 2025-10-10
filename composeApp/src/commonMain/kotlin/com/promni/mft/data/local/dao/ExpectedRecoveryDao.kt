@@ -19,6 +19,6 @@ interface ExpectedRecoveryDao {
     @Upsert
     suspend fun upsert(tracker: ExpectedRecoveryEntity)
 
-//    @Query("DELETE FROM expected_recovery WHERE muscleId = :muscleId")
-//    suspend fun delete(muscleId: MuscleId)
+    @Query("DELETE FROM expected_recovery WHERE muscleId = :muscleId")
+    suspend fun delete(muscleId: MuscleId)
 }

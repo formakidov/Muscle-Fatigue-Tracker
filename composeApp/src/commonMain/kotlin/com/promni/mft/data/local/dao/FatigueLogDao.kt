@@ -14,6 +14,9 @@ interface FatigueLogDao {
     @Query("SELECT * FROM fatigue_logs WHERE muscleId = :muscleId ORDER BY timestamp DESC")
     fun getLogsForMuscle(muscleId: MuscleId): Flow<List<FatigueLogEntity>>
 
+    @Query("SELECT * FROM fatigue_logs WHERE muscleId = :muscleId ORDER BY timestamp DESC LIMIT 1")
+    suspend fun getLatestLogForMuscle(muscleId: MuscleId): FatigueLogEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFatigueLog(log: FatigueLogEntity)
 

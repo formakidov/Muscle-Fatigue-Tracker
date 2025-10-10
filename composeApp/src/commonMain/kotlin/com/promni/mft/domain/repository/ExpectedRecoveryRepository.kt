@@ -7,4 +7,5 @@ import com.promni.mft.data.local.entities.Recovery
 interface ExpectedRecoveryRepository {
     suspend fun setExpectedRecovery(muscleId: MuscleId, time: Recovery)
     suspend fun getExpectedRecovery(id: MuscleId): ExpectedRecoveryEntity?
+    suspend fun clearExpectedRecovery(muscleId: MuscleId)
 }

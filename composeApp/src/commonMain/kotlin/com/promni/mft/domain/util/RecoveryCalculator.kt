@@ -1,12 +1,18 @@
 package com.promni.mft.domain.util
 
+import com.promni.mft.domain.model.FatigueLog
 import kotlin.math.exp
 
 object RecoveryCalculator {
 
-    fun calculateExpectedRecovery(fatigue: Float, totalRecoveryTime: Recovery): Long {
+    fun calculateExpectedRecoveryFromNow(fatigue: Float, totalRecoveryTime: Recovery): Long {
         val recoveryTimeMillis = (totalRecoveryTime * (fatigue / 100f)).toLong()
         return SystemTime.nowMillis() + recoveryTimeMillis
+    }
+
+    fun calculateExpectedRecoveryFromLog(log: FatigueLog, totalRecoveryTime: Recovery): Long {
+        val recoveryTimeMillis = (totalRecoveryTime * (log.value / 100f)).toLong()
+        return log.timestamp + recoveryTimeMillis
     }
 
     fun calculateCurrentFatigue(expectedRecoveryTimestamp: Long?, totalRecoveryTime: Recovery): Float {

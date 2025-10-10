@@ -94,8 +94,7 @@ private fun MuscleDetailsContent(
 
         Text(text = "Slide to set how tired your muscle is right now:", style = MaterialTheme.typography.bodyMedium)
 
-        // todo if record for today exists: ask if to update todays record or add new
-        var fatigueSliderValue by remember { mutableFloatStateOf(muscleInfo.fatigue / 100f) }
+        var fatigueSliderValue by remember(muscleInfo.fatigue) { mutableFloatStateOf(muscleInfo.fatigue / 100f) }
         Slider(
             value = fatigueSliderValue,
             onValueChange = { fatigueSliderValue = it },

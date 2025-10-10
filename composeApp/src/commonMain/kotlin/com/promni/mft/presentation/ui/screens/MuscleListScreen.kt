@@ -54,8 +54,9 @@ fun MuscleListScreen(
     modifier: Modifier,
     uiState: MuscleUiState,
 ) {
-    var selectedMuscle by remember { mutableStateOf<MuscleInfo?>(null) }
+    var selectedMuscleId by remember { mutableStateOf<Long?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
     Box(modifier = modifier) {
         when (uiState) {
             is MuscleUiState.Loading -> {
@@ -84,15 +85,19 @@ fun MuscleListScreen(
                     Text("No muscles found")
                 } else {
                     MusclesListContent(musclesInfo, onMuscleSelected = {
-                        selectedMuscle = it
+                        selectedMuscleId = it.muscle.id
                     })
+                }
+
+                val selectedMuscle = selectedMuscleId?.let { id ->
+                    musclesInfo.find { it.muscle.id == id }
                 }
 
                 if (selectedMuscle != null) {
                     MuscleDetailsBottomSheet(
-                        muscleInfo = selectedMuscle!!,
+                        muscleInfo = selectedMuscle,
                         sheetState = sheetState,
-                        onDismiss = { selectedMuscle = null }
+                        onDismiss = { selectedMuscleId = null }
                     )
                 }
             }
