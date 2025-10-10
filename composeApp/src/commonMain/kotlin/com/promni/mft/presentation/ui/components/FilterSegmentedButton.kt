@@ -1,5 +1,8 @@
 package com.promni.mft.presentation.ui.components
 
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -8,6 +11,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import com.promni.mft.domain.repository.MuscleFilter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,16 +31,23 @@ fun FilterSegmentedButton(
         inactiveBorderColor = MaterialTheme.colorScheme.outline
     )
 
-    SingleChoiceSegmentedButtonRow(modifier = modifier) {
+    SingleChoiceSegmentedButtonRow(modifier = modifier.height(IntrinsicSize.Min)) {
         options.forEachIndexed { index, filter ->
             SegmentedButton(
+                modifier = Modifier
+                    .fillMaxSize(),
                 shape = SegmentedButtonDefaults.itemShape(
                     index = index,
                     count = options.size
                 ),
                 onClick = { onFilterSelected(filter) },
                 selected = filter == selectedFilter,
-                label = { Text(filter.toDisplayString()) },
+                label = {
+                    Text(
+                        text = filter.toDisplayString(),
+                        textAlign = TextAlign.Center
+                    )
+                },
                 colors = colors
             )
         }

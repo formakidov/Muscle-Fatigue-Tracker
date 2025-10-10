@@ -109,6 +109,7 @@ fun FatigueChart(
 
 @Composable
 private fun WeekNavigator(
+    modifier: Modifier = Modifier,
     startOfWeek: LocalDate,
     endOfWeek: LocalDate,
     onPreviousWeek: () -> Unit,
@@ -116,7 +117,7 @@ private fun WeekNavigator(
     isNextWeekEnabled: Boolean
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -141,15 +142,15 @@ private fun WeekNavigator(
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 private fun WeeklyFatigueGraph(
+    modifier: Modifier = Modifier,
     categories: List<String>,
     data: List<Float>,
     weekDates: List<LocalDate>,
     onBarClick: (LocalDate, Offset) -> Unit
 ) {
     XYGraph(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+        modifier = modifier
+            .fillMaxWidth(),
         xAxisModel = CategoryAxisModel(categories),
         yAxisModel = rememberFloatLinearAxisModel(
             range = 0f..100f,

@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
@@ -17,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,9 +70,12 @@ fun MuscleListScreen(
 ) {
     var selectedMuscleId by remember { mutableStateOf<Long?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val lazyGridState = rememberLazyGridState()
 
-    val density = LocalDensity.current
-    var filterHeight by remember { mutableStateOf(0.dp) }
+    // Scroll to top when the filter changes
+    LaunchedEffect(muscleFilter) {
+        lazyGridState.scrollToItem(0)
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         when (uiState) {
@@ -94,24 +100,16 @@ fun MuscleListScreen(
             }
 
             is MuscleUiState.Success -> {
-                val musclesInfo = uiState.musclesInfo
-                if (musclesInfo.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("No muscles found for this filter.")
-                    }
-                } else {
-                    MusclesListContent(
-                        musclesInfo = musclesInfo,
-                        onMuscleSelected = { selectedMuscleId = it.muscle.id },
-                        contentPadding = PaddingValues(bottom = filterHeight + 32.dp, start = 16.dp, end = 16.dp, top = 16.dp)
-                    )
-                }
+                MusclesListContent(
+                    musclesInfo = uiState.musclesInfo,
+                    onMuscleSelected = { selectedMuscleId = it.muscle.id },
+                    lazyGridState = lazyGridState,
+                    muscleFilter = muscleFilter,
+                    onFilterSelected = onFilterSelected
+                )
 
                 val selectedMuscle = selectedMuscleId?.let { id ->
-                    musclesInfo.find { it.muscle.id == id }
+                    uiState.musclesInfo.find { it.muscle.id == id }
                 }
 
                 if (selectedMuscle != null) {
@@ -121,6 +119,56 @@ fun MuscleListScreen(
                         onDismiss = { selectedMuscleId = null }
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun MusclesListContent(
+    musclesInfo: List<MuscleInfo>,
+    onMuscleSelected: (muscle: MuscleInfo) -> Unit,
+    lazyGridState: LazyGridState,
+    muscleFilter: MuscleFilter,
+    onFilterSelected: (MuscleFilter) -> Unit
+) {
+    if (musclesInfo.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("No muscles found for this filter.")
+        }
+        return
+    }
+
+    val density = LocalDensity.current
+    var filterHeight by remember { mutableStateOf(0.dp) }
+    val contentPadding = PaddingValues(
+        bottom = filterHeight + 32.dp, start = 16.dp, end = 16.dp, top = 16.dp
+    )
+    val windowSizeClass = getWindowSizeClass()
+    val widthSizeClass = windowSizeClass.widthSizeClass
+    val itemSpacing = 12.dp
+
+    val columnsCount = when (widthSizeClass) {
+        WindowWidthSizeClass.Medium -> 2
+        WindowWidthSizeClass.Expanded -> 3
+        else -> 1
+    }
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            state = lazyGridState,
+            columns = GridCells.Fixed(columnsCount),
+            contentPadding = contentPadding,
+            verticalArrangement = Arrangement.spacedBy(itemSpacing),
+            horizontalArrangement = Arrangement.spacedBy(itemSpacing)
+        ) {
+            items(musclesInfo, key = { it.muscle.id }) { muscleInfo ->
+                MuscleItem(
+                    muscleInfo = muscleInfo,
+                    onClick = { onMuscleSelected(muscleInfo) },
+                )
             }
         }
 
@@ -137,36 +185,6 @@ fun MuscleListScreen(
             selectedFilter = muscleFilter,
             onFilterSelected = onFilterSelected
         )
-    }
-}
-
-@Composable
-fun MusclesListContent(
-    musclesInfo: List<MuscleInfo>,
-    onMuscleSelected: (muscle: MuscleInfo) -> Unit,
-    contentPadding: PaddingValues,
-) {
-    val windowSizeClass = getWindowSizeClass()
-    val widthSizeClass = windowSizeClass.widthSizeClass
-    val itemSpacing = 12.dp
-
-    val columnsCount = when (widthSizeClass) {
-        WindowWidthSizeClass.Medium -> 2
-        WindowWidthSizeClass.Expanded -> 3
-        else -> 1
-    }
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(columnsCount),
-        contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(itemSpacing),
-        horizontalArrangement = Arrangement.spacedBy(itemSpacing)
-    ) {
-        items(musclesInfo, key = { it.muscle.id }) { muscleInfo ->
-            MuscleItem(
-                muscleInfo = muscleInfo,
-                onClick = { onMuscleSelected(muscleInfo) },
-            )
-        }
     }
 }
 
