@@ -1,6 +1,7 @@
 package com.promni.mft.di
 
 import com.promni.mft.domain.usecase.ChangeMuscleFatigueUseCase
+import com.promni.mft.domain.usecase.DeleteFatigueLogUseCase
 import com.promni.mft.domain.usecase.GetFatigueLogsUseCase
 import com.promni.mft.domain.usecase.GetMuscleInfoUseCase
 import com.promni.mft.domain.usecase.SetTotalRecoveryTimeUseCase
@@ -15,6 +16,7 @@ val commonModule = module {
     singleOf(::GetFatigueLogsUseCase)
     singleOf(::ChangeMuscleFatigueUseCase)
     singleOf(::SetTotalRecoveryTimeUseCase)
+    singleOf(::DeleteFatigueLogUseCase)
 
     // Sorting
     singleOf(::MuscleInfoSorter)

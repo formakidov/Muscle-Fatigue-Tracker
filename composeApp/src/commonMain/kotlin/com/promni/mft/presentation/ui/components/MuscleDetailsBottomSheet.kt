@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,38 +28,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.promni.mft.domain.model.FatigueLog
 import com.promni.mft.domain.model.MuscleInfo
 import com.promni.mft.presentation.ui.theme.AppTheme
 import com.promni.mft.presentation.ui.utils.DevicePreviews
-import com.promni.mft.presentation.ui.utils.fatigueLogs
 import com.promni.mft.presentation.ui.utils.muscleTricepsMiddleTrained
+import com.promni.mft.presentation.viewmodel.FatigueLogUiState
+import com.promni.mft.presentation.viewmodel.MuscleDetailsViewModel
 import kotlinx.datetime.LocalDate
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MuscleDetailsBottomSheet(
     muscleInfo: MuscleInfo,
     sheetState: SheetState,
-    logs: List<FatigueLog>,
     onDismiss: () -> Unit,
-    onFatigueChanged: (MuscleInfo, newValue: Float) -> Unit,
-    onRecoveryPeriodChanged: (MuscleInfo, Int) -> Unit,
-    onDeleteLog: (LocalDate) -> Unit,
-    onUpdateLog: (LocalDate) -> Unit
+    viewModel: MuscleDetailsViewModel = koinViewModel(
+        key = muscleInfo.muscle.id.toString(),
+        parameters = { parametersOf(muscleInfo.muscle.id) }
+    )
 ) {
+    val fatigueLogUiState by viewModel.fatigueLogUiState.collectAsStateWithLifecycle()
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
     ) {
-        MuscleDetailsContent(
-            muscleInfo = muscleInfo,
-            logs = logs,
-            onFatigueChanged = { fatigue -> onFatigueChanged(muscleInfo, fatigue) },
-            onRecoveryPeriodChanged = { days -> onRecoveryPeriodChanged(muscleInfo, days) },
-            onDeleteLog = onDeleteLog,
-            onUpdateLog = onUpdateLog
-        )
+        when (val uiState = fatigueLogUiState) {
+            is FatigueLogUiState.Loading -> CircularProgressIndicator()
+            is FatigueLogUiState.Error -> Text("Error loading logs.")
+            is FatigueLogUiState.Success -> {
+                MuscleDetailsContent(
+                    muscleInfo = muscleInfo,
+                    logs = uiState.logs,
+                    onFatigueChanged = viewModel::setFatigue,
+                    onRecoveryPeriodChanged = viewModel::setRecoveryPeriod,
+                    onDeleteLog = viewModel::deleteLog,
+                )
+            }
+        }
     }
 }
 
@@ -69,7 +80,6 @@ private fun MuscleDetailsContent(
     onFatigueChanged: (Float) -> Unit,
     onRecoveryPeriodChanged: (Int) -> Unit,
     onDeleteLog: (LocalDate) -> Unit,
-    onUpdateLog: (LocalDate) -> Unit
 ) {
     Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 0.dp)) {
 
@@ -116,7 +126,6 @@ private fun MuscleDetailsContent(
                 expanded = expanded,
                 selectedDate = selectedDate,
                 onDismiss = { expanded = false },
-                onUpdateLog = onUpdateLog,
                 onDeleteLog = onDeleteLog,
                 offset = DpOffset(barClickOffset.x.dp, barClickOffset.y.dp)
             )
@@ -130,7 +139,6 @@ private fun FatigueLogDropDownMenu(
     selectedDate: LocalDate?,
     onDismiss: () -> Unit,
     offset: DpOffset,
-    onUpdateLog: (LocalDate) -> Unit,
     onDeleteLog: (LocalDate) -> Unit
 ) {
     DropdownMenu(
@@ -139,14 +147,7 @@ private fun FatigueLogDropDownMenu(
         onDismissRequest = onDismiss
     ) {
         DropdownMenuItem(
-            text = { Text("Update") },
-            onClick = {
-                selectedDate?.let(onUpdateLog)
-                onDismiss()
-            }
-        )
-        DropdownMenuItem(
-            text = { Text("Delete") },
+            text = { Text("Delete log for ${selectedDate?.toString().orEmpty()}") },
             onClick = {
                 selectedDate?.let(onDeleteLog)
                 onDismiss()
@@ -163,15 +164,10 @@ private fun ThemedMuscleDetailsBottomSheetPreview(
     AppTheme(darkTheme = darkTheme, dynamicColor = false) {
         MuscleDetailsBottomSheet(
             muscleInfo = muscleTricepsMiddleTrained,
-            logs = fatigueLogs,
-            onDismiss = {},
-            onFatigueChanged = { _, _ -> },
-            onRecoveryPeriodChanged = { _, _ -> },
-            onDeleteLog = {},
-            onUpdateLog = {},
             sheetState = rememberModalBottomSheetState(
                 skipPartiallyExpanded = skipPartiallyExpanded
             ),
+            onDismiss = {},
         )
     }
 }

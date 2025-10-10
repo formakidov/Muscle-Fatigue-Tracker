@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.promni.mft.data.local.entities.MuscleId
 import com.promni.mft.domain.model.MuscleInfo
 import com.promni.mft.presentation.ui.components.MuscleDetailsBottomSheet
 import com.promni.mft.presentation.ui.components.MuscleItem
@@ -31,7 +30,6 @@ import com.promni.mft.presentation.ui.theme.AppTheme
 import com.promni.mft.presentation.ui.utils.DevicePreviews
 import com.promni.mft.presentation.ui.utils.allMuscles
 import com.promni.mft.presentation.ui.utils.getWindowSizeClass
-import com.promni.mft.presentation.viewmodel.FatigueLogUiState
 import com.promni.mft.presentation.viewmodel.MuscleUiState
 import com.promni.mft.presentation.viewmodel.MusclesListViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -42,17 +40,10 @@ fun MuscleListScreen(
     viewModel: MusclesListViewModel = koinViewModel()
 ) {
     val muscleUiState by viewModel.muscleUiState.collectAsStateWithLifecycle()
-    val fatigueLogUiState by viewModel.fatigueLogUiState.collectAsStateWithLifecycle()
-    val selectedMuscleId by viewModel.selectedMuscleId.collectAsStateWithLifecycle()
 
     MuscleListScreen(
         modifier,
         uiState = muscleUiState,
-        fatigueLogUiState = fatigueLogUiState,
-        selectedMuscleId = selectedMuscleId,
-        onMuscleSelected = viewModel::selectMuscle,
-        onFatigueChanged = viewModel::setFatigue,
-        onRecoveryPeriodChanged = viewModel::setRecoveryPeriod
     )
 }
 
@@ -62,13 +53,8 @@ fun MuscleListScreen(
 fun MuscleListScreen(
     modifier: Modifier,
     uiState: MuscleUiState,
-    fatigueLogUiState: FatigueLogUiState = FatigueLogUiState.Loading,
-    selectedMuscleId: MuscleId?,
-    onMuscleSelected: (MuscleId) -> Unit,
-    onFatigueChanged: (MuscleInfo, newValue: Float) -> Unit,
-    onRecoveryPeriodChanged: (MuscleInfo, Int) -> Unit,
 ) {
-    var showBottomSheet by remember { mutableStateOf(false) }
+    var selectedMuscle by remember { mutableStateOf<MuscleInfo?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     Box(modifier = modifier) {
         when (uiState) {
@@ -97,31 +83,16 @@ fun MuscleListScreen(
                 if (musclesInfo.isEmpty()) {
                     Text("No muscles found")
                 } else {
-                    MusclesContent(musclesInfo, onMuscleSelected = {
-                        onMuscleSelected(it)
-                        showBottomSheet = true
+                    MusclesListContent(musclesInfo, onMuscleSelected = {
+                        selectedMuscle = it
                     })
                 }
 
-                val muscleInfo = musclesInfo.find { it.muscle.id == selectedMuscleId }
-                if (showBottomSheet && muscleInfo != null) {
-                    val logs = when (fatigueLogUiState) {
-                        is FatigueLogUiState.Success -> fatigueLogUiState.logs
-                        else -> emptyList()
-                    }
-
+                if (selectedMuscle != null) {
                     MuscleDetailsBottomSheet(
-                        muscleInfo = muscleInfo,
+                        muscleInfo = selectedMuscle!!,
                         sheetState = sheetState,
-                        logs = logs,
-                        onDismiss = { showBottomSheet = false },
-                        onFatigueChanged = { muscleInfo, newValue ->
-                            onFatigueChanged(muscleInfo, newValue)
-                            showBottomSheet = false
-                        },
-                        onRecoveryPeriodChanged = onRecoveryPeriodChanged,
-                        onDeleteLog = { }, // todo
-                        onUpdateLog = { } // todo
+                        onDismiss = { selectedMuscle = null }
                     )
                 }
             }
@@ -130,7 +101,7 @@ fun MuscleListScreen(
 }
 
 @Composable
-fun MusclesContent(musclesInfo: List<MuscleInfo>, onMuscleSelected: (id: MuscleId) -> Unit) {
+fun MusclesListContent(musclesInfo: List<MuscleInfo>, onMuscleSelected: (muscle: MuscleInfo) -> Unit) {
     val windowSizeClass = getWindowSizeClass()
     val widthSizeClass = windowSizeClass.widthSizeClass
     val contentPadding = PaddingValues(16.dp)
@@ -150,7 +121,7 @@ fun MusclesContent(musclesInfo: List<MuscleInfo>, onMuscleSelected: (id: MuscleI
         items(musclesInfo, key = { it.muscle.id }) { muscleInfo ->
             MuscleItem(
                 muscleInfo = muscleInfo,
-                onClick = { onMuscleSelected(muscleInfo.muscle.id) },
+                onClick = { onMuscleSelected(muscleInfo) },
             )
         }
     }
@@ -161,7 +132,6 @@ fun MusclesContent(musclesInfo: List<MuscleInfo>, onMuscleSelected: (id: MuscleI
 private fun ThemedMuscleListScreenPreview(
     darkTheme: Boolean,
     uiState: MuscleUiState,
-    fatigueLogUiState: FatigueLogUiState = FatigueLogUiState.Loading,
     modifier: Modifier = Modifier
 ) {
     AppTheme(darkTheme = darkTheme, dynamicColor = false) {
@@ -169,11 +139,6 @@ private fun ThemedMuscleListScreenPreview(
             MuscleListScreen(
                 modifier = modifier,
                 uiState = uiState,
-                fatigueLogUiState = fatigueLogUiState,
-                selectedMuscleId = null,
-                onMuscleSelected = {},
-                onFatigueChanged = { _, _ -> },
-                onRecoveryPeriodChanged = { _, _ -> }
             )
         }
     }
@@ -184,7 +149,6 @@ private fun ThemedMuscleListScreenPreview(
 private fun MuscleListScreenSuccessLightPreview() = ThemedMuscleListScreenPreview(
     darkTheme = false,
     uiState = MuscleUiState.Success(allMuscles),
-    fatigueLogUiState = FatigueLogUiState.Success(emptyList())
 )
 
 @DevicePreviews
@@ -192,7 +156,6 @@ private fun MuscleListScreenSuccessLightPreview() = ThemedMuscleListScreenPrevie
 private fun MuscleListScreenSuccessDarkPreview() = ThemedMuscleListScreenPreview(
     darkTheme = true,
     uiState = MuscleUiState.Success(allMuscles),
-    fatigueLogUiState = FatigueLogUiState.Success(emptyList())
 )
 
 @DevicePreviews
