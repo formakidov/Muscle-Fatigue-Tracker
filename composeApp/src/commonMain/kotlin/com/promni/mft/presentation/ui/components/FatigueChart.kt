@@ -1,6 +1,7 @@
 package com.promni.mft.presentation.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,7 +23,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.promni.mft.domain.model.FatigueLog
@@ -37,6 +41,7 @@ import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
@@ -46,11 +51,17 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
-fun FatigueChart(modifier: Modifier = Modifier, logs: List<FatigueLog>) {
+fun FatigueChart(
+    modifier: Modifier = Modifier,
+    logs: List<FatigueLog>,
+    onBarClick: (LocalDate, Offset) -> Unit = { _, _ -> }
+) {
     if (logs.isEmpty()) {
         Text(
             text = "Add a fatigue record to see your progress on the chart.",
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -80,53 +91,95 @@ fun FatigueChart(modifier: Modifier = Modifier, logs: List<FatigueLog>) {
     val data = weekDates.map { fatigueByDay[it] ?: 0f }
 
     Column(modifier = modifier) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { selectedDate = selectedDate.minus(7, DateTimeUnit.DAY) }) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Previous Week")
-            }
-            Text(
-                text = "${startOfWeek.dayOfMonth}.${startOfWeek.monthNumber} - ${endOfWeek.dayOfMonth}.${endOfWeek.monthNumber}",
-                style = MaterialTheme.typography.titleMedium
-            )
-            IconButton(
-                onClick = { selectedDate = selectedDate.plus(7, DateTimeUnit.DAY) },
-                enabled = endOfWeek < today
-            ) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Next Week")
-            }
-        }
+        WeekNavigator(
+            startOfWeek = startOfWeek,
+            endOfWeek = endOfWeek,
+            onPreviousWeek = { selectedDate = selectedDate.minus(7, DateTimeUnit.DAY) },
+            onNextWeek = { selectedDate = selectedDate.plus(7, DateTimeUnit.DAY) },
+            isNextWeekEnabled = endOfWeek < today
+        )
 
-        XYGraph(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-            xAxisModel = CategoryAxisModel(categories),
-            yAxisModel = rememberFloatLinearAxisModel(
-                range = 0f..100f,
-                minorTickCount = 0
-            ),
+        WeeklyFatigueGraph(
+            categories = categories,
+            data = data,
+            weekDates = weekDates,
+            onBarClick = onBarClick
+        )
+    }
+}
+
+@Composable
+private fun WeekNavigator(
+    startOfWeek: LocalDate,
+    endOfWeek: LocalDate,
+    onPreviousWeek: () -> Unit,
+    onNextWeek: () -> Unit,
+    isNextWeekEnabled: Boolean
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onPreviousWeek) {
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Previous Week")
+        }
+        Text(
+            text = "${startOfWeek.dayOfMonth}.${startOfWeek.monthNumber} - ${endOfWeek.dayOfMonth}.${endOfWeek.monthNumber}",
+            style = MaterialTheme.typography.titleMedium
+        )
+        IconButton(
+            onClick = onNextWeek,
+            enabled = isNextWeekEnabled
         ) {
-            VerticalBarPlot(
-                xData = categories,
-                yData = data,
-                bar = { index ->
-                    val fatigueValue = data[index]
-                    if (fatigueValue > 0f) {
-                        val (darkerColor, lighterColor) = getFatigueColors(fatigueValue)
-                        DefaultVerticalBar(
-                            color = lighterColor,
-                            shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
-                            border = BorderStroke(1.dp, darkerColor),
-                        )
-                    }
-                }
-            )
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Next Week")
         }
     }
 }
 
+@OptIn(ExperimentalKoalaPlotApi::class)
+@Composable
+private fun WeeklyFatigueGraph(
+    categories: List<String>,
+    data: List<Float>,
+    weekDates: List<LocalDate>,
+    onBarClick: (LocalDate, Offset) -> Unit
+) {
+    XYGraph(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        xAxisModel = CategoryAxisModel(categories),
+        yAxisModel = rememberFloatLinearAxisModel(
+            range = 0f..100f,
+            minorTickCount = 0
+        ),
+    ) {
+        VerticalBarPlot(
+            xData = categories,
+            yData = data,
+            bar = { index ->
+                val fatigueValue = data[index]
+                if (fatigueValue > 0f) {
+                    val date = weekDates[index]
+                    val (darkerColor, lighterColor) = getFatigueColors(fatigueValue)
+                    DefaultVerticalBar(
+                        modifier = Modifier.pointerInput(date) {
+                            detectTapGestures { offset ->
+                                onBarClick(date, offset)
+                            }
+                        },
+                        brush = Brush.verticalGradient(listOf(lighterColor, darkerColor)),
+                        shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
+                        border = BorderStroke(1.dp, darkerColor),
+                    )
+                }
+            }
+        )
+    }
+}
 
 private fun getFatigueColors(fatigue: Float): Pair<Color, Color> {
     val colorStart: Color
@@ -157,7 +210,8 @@ private fun ThemedFatigueChartPreview(darkTheme: Boolean, logs: List<FatigueLog>
     AppTheme(darkTheme = darkTheme, dynamicColor = false) {
         Surface {
             FatigueChart(
-                logs = logs
+                logs = logs,
+                onBarClick = { _, _ -> }
             )
         }
     }

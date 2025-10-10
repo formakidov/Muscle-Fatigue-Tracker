@@ -66,7 +66,7 @@ fun MuscleListScreen(
     selectedMuscleId: MuscleId?,
     onMuscleSelected: (MuscleId) -> Unit,
     onFatigueChanged: (MuscleInfo, newValue: Float) -> Unit,
-    onRecoveryPeriodChanged: (MuscleInfo, Int) -> Unit
+    onRecoveryPeriodChanged: (MuscleInfo, Int) -> Unit,
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -119,7 +119,9 @@ fun MuscleListScreen(
                             onFatigueChanged(muscleInfo, newValue)
                             showBottomSheet = false
                         },
-                        onRecoveryPeriodChanged = onRecoveryPeriodChanged
+                        onRecoveryPeriodChanged = onRecoveryPeriodChanged,
+                        onDeleteLog = { }, // todo
+                        onUpdateLog = { } // todo
                     )
                 }
             }
