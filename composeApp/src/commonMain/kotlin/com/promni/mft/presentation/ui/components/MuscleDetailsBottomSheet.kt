@@ -147,7 +147,7 @@ private fun FatigueLogDropDownMenu(
         onDismissRequest = onDismiss
     ) {
         DropdownMenuItem(
-            text = { Text("Delete log for ${selectedDate?.toString().orEmpty()}") },
+            text = { Text("Delete log(s) for ${selectedDate?.toString().orEmpty()}") },
             onClick = {
                 selectedDate?.let(onDeleteLog)
                 onDismiss()

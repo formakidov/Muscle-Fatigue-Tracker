@@ -8,7 +8,6 @@ class DeleteFatigueLogUseCase(
     private val fatigueLogRepository: FatigueLogRepository
 ) {
     suspend operator fun invoke(muscleId: MuscleId, date: LocalDate) {
-//        fatigueLogRepository.deleteLog(muscleId, date)
-        // todo delete log, then update current fatigue for muscle
+        fatigueLogRepository.deleteLog(muscleId, date)
     }
 }
