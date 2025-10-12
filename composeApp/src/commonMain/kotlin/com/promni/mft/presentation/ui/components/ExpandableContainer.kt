@@ -7,8 +7,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.promni.mft.presentation.ui.theme.AppTheme
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
 /**
@@ -56,3 +64,44 @@ fun ExpandableContainer(
         }
     }
 }
+
+@Composable
+private fun ThemedExpandableContainerPreview(darkTheme: Boolean, isInitiallyExpanded: Boolean) {
+    AppTheme(darkTheme = darkTheme, dynamicColor = false) {
+        Surface {
+            var isExpanded by remember { mutableStateOf(isInitiallyExpanded) }
+            ExpandableContainer(
+                isExpanded = isExpanded,
+                onExpandedChange = { isExpanded = !isExpanded },
+                expandedContent = {
+                    Text("This is the expanded content.")
+                },
+                content = { expanded ->
+                    Text(
+                        if (expanded) {
+                            "Content (Expanded)"
+                        } else {
+                            "Content (Collapsed)"
+                        }
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Preview(name = "Collapsed Light")
+@Composable
+private fun ExpandableContainerCollapsedLightPreview() = ThemedExpandableContainerPreview(darkTheme = false, isInitiallyExpanded = false)
+
+@Preview(name = "Collapsed Dark")
+@Composable
+private fun ExpandableContainerCollapsedDarkPreview() = ThemedExpandableContainerPreview(darkTheme = true, isInitiallyExpanded = false)
+
+@Preview(name = "Expanded Light")
+@Composable
+private fun ExpandableContainerExpandedLightPreview() = ThemedExpandableContainerPreview(darkTheme = false, isInitiallyExpanded = true)
+
+@Preview(name = "Expanded Dark")
+@Composable
+private fun ExpandableContainerExpandedDarkPreview() = ThemedExpandableContainerPreview(darkTheme = true, isInitiallyExpanded = true)

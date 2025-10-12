@@ -4,6 +4,7 @@ import com.promni.mft.domain.model.MuscleInfo
 
 class MuscleInfoSorter {
     fun sort(muscles: List<MuscleInfo>) = muscles.sortedWith(compareBy<MuscleInfo> {
-        if (it.expectedRecovery <= SystemTime.nowMillis()) Long.MAX_VALUE else it.expectedRecovery
+        // Fresh muscles (recovered) should come first.
+        if (it.expectedRecovery <= SystemTime.nowMillis()) Long.MIN_VALUE else it.expectedRecovery
     }.thenBy { it.muscle.name })
 }

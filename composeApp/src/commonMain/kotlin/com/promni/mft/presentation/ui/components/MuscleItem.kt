@@ -1,7 +1,6 @@
 package com.promni.mft.presentation.ui.components
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,11 +10,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -30,11 +29,13 @@ import androidx.compose.ui.unit.sp
 import com.promni.mft.domain.model.MuscleInfo
 import com.promni.mft.domain.util.SystemTime
 import com.promni.mft.muscleImageMap
-import com.promni.mft.presentation.ui.utils.muscleAbs
-import com.promni.mft.presentation.ui.utils.muscleBiceps
-import com.promni.mft.presentation.ui.utils.muscleQuadriceps
-import com.promni.mft.presentation.ui.utils.muscleTriceps
+import com.promni.mft.presentation.ui.theme.AppTheme
+import com.promni.mft.presentation.ui.utils.muscleAbsNotTrained
+import com.promni.mft.presentation.ui.utils.muscleBicepsEasyTrained
+import com.promni.mft.presentation.ui.utils.muscleQuadricepsHardTrained
+import com.promni.mft.presentation.ui.utils.muscleTricepsMiddleTrained
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun MuscleItem(
@@ -44,13 +45,12 @@ fun MuscleItem(
     val backgroundGradient = getFatigueGradient(muscleInfo.fatigue)
 
     Box(
-        modifier = Modifier.Companion
+        modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 70.dp)
             .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp))
             .background(brush = backgroundGradient, shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
             .clickable { onClick() }
-            .padding(24.dp)
+            .padding(12.dp)
             .animateContentSize(),
     ) {
         Row(verticalAlignment = CenterVertically) {
@@ -62,22 +62,22 @@ fun MuscleItem(
                         .padding(4.dp),
                     contentDescription = null
                 )
-                Spacer(modifier = Modifier.width(24.dp))
+                Spacer(modifier = Modifier.width(16.dp))
             }
             Column {
                 Text(
                     text = muscleInfo.muscle.name,
-                    color = Color.Companion.White,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Companion.Bold,
+                    color = Color.White,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
                 )
 
                 if (muscleInfo.fatigue > 0 && muscleInfo.expectedRecovery > 0) {
-                    Spacer(modifier = Modifier.Companion.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Recovered in: ${formatRemainingTime(muscleInfo.expectedRecovery)}",
-                        color = Color.Companion.White.copy(alpha = 0.9f),
-                        fontSize = 18.sp
+                        text = "Recovery in: ${formatRemainingTime(muscleInfo.expectedRecovery)}",
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 16.sp
                     )
                 }
             }
@@ -127,34 +127,45 @@ private fun getFatigueGradient(fatigue: Float): Brush {
     )
 }
 
-@Preview
 @Composable
-fun MuscleItemPreviewBiceps() {
-    Column {
-        MuscleItem(muscleInfo = muscleBiceps) {}
+private fun ThemedMuscleItemPreview(darkTheme: Boolean, muscleInfo: MuscleInfo) {
+    AppTheme(darkTheme = darkTheme, dynamicColor = false) {
+        Surface {
+            Column(modifier = Modifier.padding(8.dp)) {
+                MuscleItem(muscleInfo = muscleInfo) {}
+            }
+        }
     }
 }
 
-@Preview
+@Preview(name = "Abs Light (Not trained)")
 @Composable
-fun MuscleItemPreviewAbs() {
-    Column {
-        MuscleItem(muscleInfo = muscleAbs) {}
-    }
-}
+private fun MuscleItemPreviewAbsLight() = ThemedMuscleItemPreview(darkTheme = false, muscleInfo = muscleAbsNotTrained)
 
-@Preview
+@Preview(name = "Abs Dark (Not trained)")
 @Composable
-fun MuscleItemPreviewTriceps() {
-    Column {
-        MuscleItem(muscleInfo = muscleTriceps) {}
-    }
-}
+private fun MuscleItemPreviewAbsDark() = ThemedMuscleItemPreview(darkTheme = true, muscleInfo = muscleAbsNotTrained)
 
-@Preview
+@Preview(name = "Biceps Light (Easy trained)")
 @Composable
-fun MuscleItemPreviewQuadriceps() {
-    Column {
-        MuscleItem(muscleInfo = muscleQuadriceps) {}
-    }
-}
+private fun MuscleItemPreviewBicepsLight() = ThemedMuscleItemPreview(darkTheme = false, muscleInfo = muscleBicepsEasyTrained)
+
+@Preview(name = "Biceps Dark (Easy trained)")
+@Composable
+private fun MuscleItemPreviewBicepsDark() = ThemedMuscleItemPreview(darkTheme = true, muscleInfo = muscleBicepsEasyTrained)
+
+@Preview(name = "Triceps Light (Middle trained)")
+@Composable
+private fun MuscleItemPreviewTricepsLight() = ThemedMuscleItemPreview(darkTheme = false, muscleInfo = muscleTricepsMiddleTrained)
+
+@Preview(name = "Triceps Dark (Middle trained)")
+@Composable
+private fun MuscleItemPreviewTricepsDark() = ThemedMuscleItemPreview(darkTheme = true, muscleInfo = muscleTricepsMiddleTrained)
+
+@Preview(name = "Quadriceps Light (Hard trained)")
+@Composable
+private fun MuscleItemPreviewQuadricepsLight() = ThemedMuscleItemPreview(darkTheme = false, muscleInfo = muscleQuadricepsHardTrained)
+
+@Preview(name = "Quadriceps Dark (Hard trained)")
+@Composable
+private fun MuscleItemPreviewQuadricepsDark() = ThemedMuscleItemPreview(darkTheme = true, muscleInfo = muscleQuadricepsHardTrained)
