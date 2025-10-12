@@ -1,5 +1,10 @@
 package com.promni.mft.presentation.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -56,54 +61,63 @@ fun FatigueChart(
     logs: List<FatigueLog>,
     onBarClick: (LocalDate, Offset) -> Unit = { _, _ -> }
 ) {
-    if (logs.isEmpty()) {
+    AnimatedVisibility(
+        visible = logs.isEmpty(),
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically()
+    ) {
         Text(
             text = "Add a fatigue record to see your progress on the chart.",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         )
-        return
     }
 
-    var selectedDate by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
-    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    AnimatedVisibility(
+        visible = logs.isNotEmpty(),
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically()
+    ) {
+        var selectedDate by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
-    val startOfWeek = selectedDate.minus(selectedDate.dayOfWeek.ordinal, DateTimeUnit.DAY)
-    val endOfWeek = startOfWeek.plus(6, DateTimeUnit.DAY)
+        val startOfWeek = selectedDate.minus(selectedDate.dayOfWeek.ordinal, DateTimeUnit.DAY)
+        val endOfWeek = startOfWeek.plus(6, DateTimeUnit.DAY)
 
-    val fatigueByDay = logs.groupBy {
-        Instant.fromEpochMilliseconds(it.timestamp)
-            .toLocalDateTime(TimeZone.currentSystemDefault()).date
-    }.mapValues { (_, logs) ->
-        logs.maxByOrNull { it.timestamp }?.value ?: 0f
-    }
+        val fatigueByDay = logs.groupBy {
+            Instant.fromEpochMilliseconds(it.timestamp)
+                .toLocalDateTime(TimeZone.currentSystemDefault()).date
+        }.mapValues { (_, logs) ->
+            logs.maxByOrNull { it.timestamp }?.value ?: 0f
+        }
 
-    val weekDates = (0..6).map { startOfWeek.plus(it, DateTimeUnit.DAY) }
-    val categories = weekDates.map {
-        val dayOfWeek = it.dayOfWeek.name.substring(0, 3)
-        "$dayOfWeek\n${it.dayOfMonth}"
-    }
-    val data = weekDates.map { fatigueByDay[it] ?: 0f }
+        val weekDates = (0..6).map { startOfWeek.plus(it, DateTimeUnit.DAY) }
+        val categories = weekDates.map {
+            val dayOfWeek = it.dayOfWeek.name.substring(0, 3)
+            "$dayOfWeek\n${it.dayOfMonth}"
+        }
+        val data = weekDates.map { fatigueByDay[it] ?: 0f }
 
-    Column(modifier = modifier) {
-        WeekNavigator(
-            startOfWeek = startOfWeek,
-            endOfWeek = endOfWeek,
-            onPreviousWeek = { selectedDate = selectedDate.minus(7, DateTimeUnit.DAY) },
-            onNextWeek = { selectedDate = selectedDate.plus(7, DateTimeUnit.DAY) },
-            isNextWeekEnabled = endOfWeek < today
-        )
+        Column(modifier = modifier) {
+            WeekNavigator(
+                startOfWeek = startOfWeek,
+                endOfWeek = endOfWeek,
+                onPreviousWeek = { selectedDate = selectedDate.minus(7, DateTimeUnit.DAY) },
+                onNextWeek = { selectedDate = selectedDate.plus(7, DateTimeUnit.DAY) },
+                isNextWeekEnabled = endOfWeek < today
+            )
 
-        WeeklyFatigueGraph(
-            categories = categories,
-            data = data,
-            weekDates = weekDates,
-            onBarClick = onBarClick
-        )
+            WeeklyFatigueGraph(
+                categories = categories,
+                data = data,
+                weekDates = weekDates,
+                onBarClick = onBarClick
+            )
+        }
     }
 }
 
