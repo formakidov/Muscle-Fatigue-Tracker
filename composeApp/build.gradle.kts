@@ -10,11 +10,11 @@ plugins {
     alias(libs.plugins.room)
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.mokkery)
-    kotlin("plugin.allopen") version "2.2.20"
+    alias(libs.plugins.kotlin.allopen)
 }
 
 allOpen {
-    annotation("com.promni.mft.annotations.OpenForMokkery")
+    annotation("com.promni.mft.annotations.OpenForTesting")
 }
 
 kotlin {

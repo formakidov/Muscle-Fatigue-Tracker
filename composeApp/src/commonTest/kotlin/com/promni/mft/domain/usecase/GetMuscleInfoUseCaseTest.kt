@@ -31,13 +31,15 @@ class GetMuscleInfoUseCaseTest {
     @Test
     fun `invoke calls repository and sorter, and returns sorter's result`() = runTest {
         // Given
+        val muscle1 = Muscle(1, "Biceps")
+        val muscle2 = Muscle(2, "Triceps")
         val unsortedMuscleInfoList = listOf(
-            MuscleInfo(mock<Muscle>(), fatigue = 0.5f, expectedRecovery = 0L, totalRecoveryTime = 10L),
-            MuscleInfo(mock<Muscle>(), fatigue = 0.3f, expectedRecovery = 1000L, totalRecoveryTime = 10L)
+            MuscleInfo(muscle1, fatigue = 0.5f, expectedRecovery = 0L, totalRecoveryTime = 10L),
+            MuscleInfo(muscle2, fatigue = 0.3f, expectedRecovery = 1000L, totalRecoveryTime = 10L)
         )
         val sortedMuscleInfoList = listOf(
-            MuscleInfo(mock<Muscle>(), fatigue = 0.1f, expectedRecovery = 2000L, totalRecoveryTime = 5L),
-            MuscleInfo(mock<Muscle>(), fatigue = 0.8f, expectedRecovery = 500L, totalRecoveryTime = 20L)
+            MuscleInfo(muscle2, fatigue = 0.3f, expectedRecovery = 1000L, totalRecoveryTime = 10L),
+            MuscleInfo(muscle1, fatigue = 0.5f, expectedRecovery = 0L, totalRecoveryTime = 10L)
         )
 
         every { userDataRepository.muscleFilter } returns flowOf(MuscleFilter.ALL)
