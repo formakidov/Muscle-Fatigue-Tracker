@@ -1,30 +1,44 @@
 package com.promni.mft.presentation.ui.screens
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.promni.mft.data.local.entities.MuscleId
 import com.promni.mft.domain.model.MuscleInfo
+import com.promni.mft.domain.repository.MuscleFilter
+import com.promni.mft.presentation.ui.components.FilterSegmentedButton
 import com.promni.mft.presentation.ui.components.MuscleDetailsBottomSheet
 import com.promni.mft.presentation.ui.components.MuscleItem
+import com.promni.mft.presentation.ui.theme.AppTheme
+import com.promni.mft.presentation.ui.utils.DevicePreviews
 import com.promni.mft.presentation.ui.utils.allMuscles
 import com.promni.mft.presentation.ui.utils.getWindowSizeClass
-import com.promni.mft.presentation.viewmodel.FatigueLogUiState
 import com.promni.mft.presentation.viewmodel.MuscleUiState
 import com.promni.mft.presentation.viewmodel.MusclesListViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -35,68 +49,74 @@ fun MuscleListScreen(
     viewModel: MusclesListViewModel = koinViewModel()
 ) {
     val muscleUiState by viewModel.muscleUiState.collectAsStateWithLifecycle()
-    val fatigueLogUiState by viewModel.fatigueLogUiState.collectAsStateWithLifecycle()
-    val selectedMuscleId by viewModel.selectedMuscleId.collectAsStateWithLifecycle()
+    val muscleFilter by viewModel.muscleFilter.collectAsStateWithLifecycle()
 
     MuscleListScreen(
-        modifier,
+        modifier = modifier,
         uiState = muscleUiState,
-        fatigueLogUiState = fatigueLogUiState,
-        selectedMuscleId = selectedMuscleId,
-        onMuscleSelected = viewModel::selectMuscle,
-        onFatigueChanged = viewModel::setFatigue,
+        muscleFilter = muscleFilter,
+        onFilterSelected = viewModel::setMuscleFilter
     )
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MuscleListScreen(
     modifier: Modifier,
     uiState: MuscleUiState,
-    fatigueLogUiState: FatigueLogUiState,
-    selectedMuscleId: MuscleId?,
-    onMuscleSelected: (MuscleId) -> Unit,
-    onFatigueChanged: (MuscleInfo, newValue: Float) -> Unit,
+    muscleFilter: MuscleFilter,
+    onFilterSelected: (MuscleFilter) -> Unit
 ) {
-    var showBottomSheet by remember { mutableStateOf(false) }
-    Box(
-        modifier = modifier,
-    ) {
+    var selectedMuscleId by remember { mutableStateOf<Long?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val lazyGridState = rememberLazyGridState()
+
+    // Scroll to top when the filter changes
+    LaunchedEffect(muscleFilter) {
+        lazyGridState.scrollToItem(0)
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
         when (uiState) {
             is MuscleUiState.Loading -> {
-                CircularProgressIndicator()
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
 
             is MuscleUiState.Error -> {
-                Text("Error loading muscles" + uiState.exception)
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Error loading muscles")
+                    Text(uiState.exception.toString())
+                }
             }
 
             is MuscleUiState.Success -> {
-                val musclesInfo = uiState.musclesInfo
-                if (musclesInfo.isEmpty()) {
-                    Text("No muscles found")
-                } else {
-                    MusclesContent(musclesInfo, onMuscleSelected = {
-                        onMuscleSelected(it)
-                        showBottomSheet = true
-                    })
+                MusclesListContent(
+                    musclesInfo = uiState.musclesInfo,
+                    onMuscleSelected = { selectedMuscleId = it.muscle.id },
+                    lazyGridState = lazyGridState,
+                    muscleFilter = muscleFilter,
+                    onFilterSelected = onFilterSelected
+                )
+
+                val selectedMuscle = selectedMuscleId?.let { id ->
+                    uiState.musclesInfo.find { it.muscle.id == id }
                 }
 
-                val muscleInfo = musclesInfo.find { it.muscle.id == selectedMuscleId }
-                if (showBottomSheet && muscleInfo != null) {
-                    val logs = when (fatigueLogUiState) {
-                        is FatigueLogUiState.Success -> fatigueLogUiState.logs
-                        else -> emptyList()
-                    }
-
+                if (selectedMuscle != null) {
                     MuscleDetailsBottomSheet(
-                        muscleInfo = muscleInfo,
-                        logs = logs,
-                        onDismiss = { showBottomSheet = false },
-                        onFatigueChanged = { muscleInfo, newValue ->
-                            onFatigueChanged(muscleInfo, newValue)
-                            showBottomSheet = false
-                        },
+                        muscleInfo = selectedMuscle,
+                        sheetState = sheetState,
+                        onDismiss = { selectedMuscleId = null }
                     )
                 }
             }
@@ -105,34 +125,120 @@ fun MuscleListScreen(
 }
 
 @Composable
-fun MusclesContent(musclesInfo: List<MuscleInfo>, onMuscleSelected: (id: MuscleId) -> Unit) {
+fun MusclesListContent(
+    musclesInfo: List<MuscleInfo>,
+    onMuscleSelected: (muscle: MuscleInfo) -> Unit,
+    lazyGridState: LazyGridState,
+    muscleFilter: MuscleFilter,
+    onFilterSelected: (MuscleFilter) -> Unit
+) {
+    if (musclesInfo.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("No muscles found for this filter.")
+        }
+        return
+    }
+
+    val density = LocalDensity.current
+    var filterHeight by remember { mutableStateOf(0.dp) }
+    val contentPadding = PaddingValues(
+        bottom = filterHeight + 32.dp, start = 16.dp, end = 16.dp, top = 16.dp
+    )
     val windowSizeClass = getWindowSizeClass()
     val widthSizeClass = windowSizeClass.widthSizeClass
-    val contentPadding = PaddingValues(16.dp)
-    val itemSpacing = 16.dp
+    val itemSpacing = 12.dp
 
     val columnsCount = when (widthSizeClass) {
         WindowWidthSizeClass.Medium -> 2
         WindowWidthSizeClass.Expanded -> 3
         else -> 1
     }
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(columnsCount),
-        contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(itemSpacing),
-        horizontalArrangement = Arrangement.spacedBy(itemSpacing)
-    ) {
-        items(musclesInfo, key = { it.muscle.id }) { muscleInfo ->
-            MuscleItem(
-                muscleInfo = muscleInfo,
-                onClick = { onMuscleSelected(muscleInfo.muscle.id) },
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            state = lazyGridState,
+            columns = GridCells.Fixed(columnsCount),
+            contentPadding = contentPadding,
+            verticalArrangement = Arrangement.spacedBy(itemSpacing),
+            horizontalArrangement = Arrangement.spacedBy(itemSpacing)
+        ) {
+            items(musclesInfo, key = { it.muscle.id }) { muscleInfo ->
+                MuscleItem(
+                    muscleInfo = muscleInfo,
+                    onClick = { onMuscleSelected(muscleInfo) },
+                )
+            }
+        }
+
+        FilterSegmentedButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
+                .onSizeChanged {
+                    with(density) {
+                        filterHeight = it.height.toDp()
+                    }
+                },
+            selectedFilter = muscleFilter,
+            onFilterSelected = onFilterSelected
+        )
+    }
+}
+
+
+@Composable
+private fun ThemedMuscleListScreenPreview(
+    darkTheme: Boolean,
+    uiState: MuscleUiState,
+    modifier: Modifier = Modifier
+) {
+    AppTheme(darkTheme = darkTheme, dynamicColor = false) {
+        Surface {
+            MuscleListScreen(
+                modifier = modifier,
+                uiState = uiState,
+                muscleFilter = MuscleFilter.ALL,
+                onFilterSelected = {}
             )
         }
     }
 }
 
-@Preview
+@DevicePreviews
 @Composable
-fun MusclesContentPreview() {
-    MusclesContent(musclesInfo = allMuscles) {}
-}
+private fun MuscleListScreenSuccessLightPreview() = ThemedMuscleListScreenPreview(
+    darkTheme = false,
+    uiState = MuscleUiState.Success(allMuscles),
+)
+
+@DevicePreviews
+@Composable
+private fun MuscleListScreenSuccessDarkPreview() = ThemedMuscleListScreenPreview(
+    darkTheme = true,
+    uiState = MuscleUiState.Success(allMuscles),
+)
+
+@DevicePreviews
+@Composable
+private fun MuscleListScreenLoadingLightPreview() =
+    ThemedMuscleListScreenPreview(darkTheme = false, uiState = MuscleUiState.Loading)
+
+@DevicePreviews
+@Composable
+private fun MuscleListScreenLoadingDarkPreview() =
+    ThemedMuscleListScreenPreview(darkTheme = true, uiState = MuscleUiState.Loading)
+
+@DevicePreviews
+@Composable
+private fun MuscleListScreenErrorLightPreview() = ThemedMuscleListScreenPreview(
+    darkTheme = false, uiState = MuscleUiState.Error(Exception("Preview Error"))
+)
+
+@DevicePreviews
+@Composable
+private fun MuscleListScreenErrorDarkPreview() = ThemedMuscleListScreenPreview(
+    darkTheme = true, uiState = MuscleUiState.Error(Exception("Preview Error"))
+)

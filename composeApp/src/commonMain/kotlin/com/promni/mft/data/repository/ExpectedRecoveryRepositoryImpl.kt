@@ -17,4 +17,6 @@ class ExpectedRecoveryRepositoryImpl(
     }
 
     override suspend fun getExpectedRecovery(id: MuscleId) = expectedRecoveryDao.item(id)
+
+    override suspend fun clearExpectedRecovery(muscleId: MuscleId) = expectedRecoveryDao.delete(muscleId)
 }

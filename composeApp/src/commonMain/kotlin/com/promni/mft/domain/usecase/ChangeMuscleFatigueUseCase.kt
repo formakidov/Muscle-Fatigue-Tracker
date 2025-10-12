@@ -15,10 +15,10 @@ class ChangeMuscleFatigueUseCase(
         muscleId: MuscleId,
         newValue: Float,
     ) {
-        if (newValue < 0f || newValue > 100f) throw IllegalArgumentException("Fatigue value must be between 0 and 100")
+        if (newValue !in 0f..100f) throw IllegalArgumentException("Fatigue value must be between 0 and 100")
 
         val totalRecoveryTime = muscleRepository.currentTotalRecoveryTime(muscleId)
-        val expectedRecoveryTime = RecoveryCalculator.calculateExpectedRecovery(newValue, totalRecoveryTime)
+        val expectedRecoveryTime = RecoveryCalculator.calculateExpectedRecoveryFromNow(newValue, totalRecoveryTime)
         expectedRecoveryRepository.setExpectedRecovery(muscleId, expectedRecoveryTime)
 
         fatigueLogRepository.addFatigueLog(muscleId, newValue)
