@@ -9,7 +9,6 @@ import dev.mokkery.answering.throws
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
-import dev.mokkery.verify.VerifyMode.Companion.atMost
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.test.runTest
@@ -45,9 +44,9 @@ class ChangeMuscleFatigueUseCaseTest {
 
         // Then
         // Ensure no updates were attempted
-        verifySuspend(atMost(0)) { muscleRepository.currentTotalRecoveryTime(any()) }
-        verifySuspend(atMost(0)) { fatigueLogRepository.addFatigueLog(any(), any()) }
-        verifySuspend(atMost(0)) { expectedRecoveryRepository.setExpectedRecovery(any(), any()) }
+        verifySuspend(exactly(0)) { muscleRepository.currentTotalRecoveryTime(any()) }
+        verifySuspend(exactly(0)) { fatigueLogRepository.addFatigueLog(any(), any()) }
+        verifySuspend(exactly(0)) { expectedRecoveryRepository.setExpectedRecovery(any(), any()) }
     }
 
     @Test
@@ -65,9 +64,9 @@ class ChangeMuscleFatigueUseCaseTest {
 
         // Then
         // Ensure no updates were attempted
-        verifySuspend(atMost(0)) { muscleRepository.currentTotalRecoveryTime(any()) }
-        verifySuspend(atMost(0)) { fatigueLogRepository.addFatigueLog(any(), any()) }
-        verifySuspend(atMost(0)) { expectedRecoveryRepository.setExpectedRecovery(any(), any()) }
+        verifySuspend(exactly(0)) { muscleRepository.currentTotalRecoveryTime(any()) }
+        verifySuspend(exactly(0)) { fatigueLogRepository.addFatigueLog(any(), any()) }
+        verifySuspend(exactly(0)) { expectedRecoveryRepository.setExpectedRecovery(any(), any()) }
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.promni.mft.domain.util
 
 import com.promni.mft.domain.model.Muscle
 import com.promni.mft.domain.model.MuscleInfo
+import com.promni.mft.domain.repository.MuscleFilter
 import com.promni.mft.domain.repository.MuscleRepository
 import com.promni.mft.domain.repository.UserDataRepository
 import com.promni.mft.domain.usecase.GetMuscleInfoUseCase
@@ -48,6 +49,7 @@ class MuscleInfoSorterTest {
     fun `test muscles with expectedRecovery less than now order by name, expectedRecovery greater than now sort by recovery then by name`() =
         runTest {
             // Given
+            every { userDataRepository.muscleFilter } returns flowOf(MuscleFilter.ALL)
             every { muscleRepository.observeMuscles() } returns flowOf(muscleInfoList)
             every { muscleInfoSorter.sort(muscleInfoList) } returns expectedOrderList
 
