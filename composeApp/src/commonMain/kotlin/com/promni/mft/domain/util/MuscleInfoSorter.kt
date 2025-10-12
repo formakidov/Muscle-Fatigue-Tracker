@@ -1,7 +1,9 @@
 package com.promni.mft.domain.util
 
+import com.promni.mft.annotations.OpenForTesting
 import com.promni.mft.domain.model.MuscleInfo
 
+@OpenForTesting
 class MuscleInfoSorter {
     fun sort(muscles: List<MuscleInfo>) = muscles.sortedWith(compareBy<MuscleInfo> {
         // Fresh muscles (recovered) should come first.
