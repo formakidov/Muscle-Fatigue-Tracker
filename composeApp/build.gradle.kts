@@ -9,6 +9,12 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.composeHotReload)
+    alias(libs.plugins.mokkery)
+    kotlin("plugin.allopen") version "2.2.20"
+}
+
+allOpen {
+    annotation("com.promni.mft.annotations.AllOpen")
 }
 
 kotlin {
@@ -56,7 +62,7 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.koin.test)
-//            implementation(libs.koin.test.junit)
+            implementation(libs.kotlinx.coroutines.test)
         }
 
         androidMain.dependencies {
@@ -97,6 +103,10 @@ kotlin {
         schemaDirectory("$projectDir/schemas")
     }
 
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 android {
