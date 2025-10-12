@@ -14,7 +14,7 @@ plugins {
 }
 
 allOpen {
-    annotation("com.promni.mft.annotations.AllOpen")
+    annotation("com.promni.mft.annotations.OpenForMokkery")
 }
 
 kotlin {
@@ -59,12 +59,6 @@ kotlin {
     
     sourceSets {
 
-        commonTest.dependencies {
-            implementation(libs.kotlin.test)
-            implementation(libs.koin.test)
-            implementation(libs.kotlinx.coroutines.test)
-        }
-
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -97,6 +91,13 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+        }
+
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.koin.test)
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
     room {

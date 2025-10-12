@@ -1,3 +1,3 @@
 package com.promni.mft.annotations
 
-annotation class AllOpen
+annotation class OpenForMokkery
