@@ -5,8 +5,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.promni.mft.domain.model.FatigueLog
 import com.promni.mft.presentation.ui.theme.AppTheme
+import com.promni.mft.presentation.ui.utils.adjustBrightness
 import com.promni.mft.presentation.ui.utils.fatigueLogs
 import io.github.koalaplot.core.bar.DefaultVerticalBar
 import io.github.koalaplot.core.bar.VerticalBarPlot
@@ -178,7 +179,12 @@ private fun WeeklyFatigueGraph(
                 val fatigueValue = data[index]
                 if (fatigueValue > 0f) {
                     val date = weekDates[index]
-                    val (darkerColor, lighterColor) = getFatigueColors(fatigueValue)
+                    val barColor = getBarBgColor(
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fatigue = fatigueValue
+                    )
+                    val lighterColor = barColor.copy(alpha = barColor.alpha * 0.8f)
+                    val darkerColor = barColor.copy(alpha = barColor.alpha * 1.2f)
                     DefaultVerticalBar(
                         modifier = Modifier.pointerInput(date) {
                             detectTapGestures { offset ->
@@ -186,8 +192,7 @@ private fun WeeklyFatigueGraph(
                             }
                         },
                         brush = Brush.verticalGradient(listOf(lighterColor, darkerColor)),
-                        shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
-                        border = BorderStroke(1.dp, darkerColor),
+                        shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
                     )
                 }
             }
@@ -195,28 +200,17 @@ private fun WeeklyFatigueGraph(
     }
 }
 
-private fun getFatigueColors(fatigue: Float): Pair<Color, Color> {
-    val colorStart: Color
-    val colorEnd: Color
-
-    when {
-        fatigue <= 33 -> {
-            colorStart = Color(0xFF1B5E20)
-            colorEnd = Color(0xFF66BB6A)
-        }
-
-        fatigue <= 66 -> {
-            colorStart = Color(0xFFF9A825)
-            colorEnd = Color(0xFFFFF176)
-        }
-
-        else -> { // Red range
-            colorStart = Color(0xFFC62828)
-            colorEnd = Color(0xFFFF5252)
-        }
+@Composable
+private fun getBarBgColor(color: Color, fatigue: Float, isDarkTheme: Boolean = isSystemInDarkTheme()): Color {
+    val factor = when {
+        fatigue in 0f..10f -> if (isDarkTheme) 0.7f else 1.3f  // Not tired or very lightly tired - original color
+        fatigue in 11f..33f -> if (isDarkTheme) 0.8f else 1.2f // A bit tired
+        fatigue in 34f..70f -> if (isDarkTheme) 0.9f else 0.9f // Moderately tired
+        fatigue > 70f -> if (isDarkTheme) 1.0f else 0.8f       // Very tired
+        else -> 1.0f
     }
 
-    return colorStart to colorEnd
+    return color.adjustBrightness(factor)
 }
 
 @Composable

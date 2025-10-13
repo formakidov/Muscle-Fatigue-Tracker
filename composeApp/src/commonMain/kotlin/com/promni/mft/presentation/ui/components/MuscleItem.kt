@@ -4,6 +4,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,15 +15,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +31,7 @@ import com.promni.mft.domain.model.MuscleInfo
 import com.promni.mft.domain.util.SystemTime
 import com.promni.mft.muscleImageMap
 import com.promni.mft.presentation.ui.theme.AppTheme
+import com.promni.mft.presentation.ui.utils.adjustBrightness
 import com.promni.mft.presentation.ui.utils.muscleAbsNotTrained
 import com.promni.mft.presentation.ui.utils.muscleBicepsEasyTrained
 import com.promni.mft.presentation.ui.utils.muscleQuadricepsHardTrained
@@ -43,13 +45,16 @@ fun MuscleItem(
     muscleInfo: MuscleInfo,
     onClick: () -> Unit
 ) {
-    val backgroundGradient = getFatigueGradient(muscleInfo.fatigue)
+    val fatigue = muscleInfo.fatigue
+    val backgroundColor = getBgColor(baseColor = MaterialTheme.colorScheme.primaryContainer, fatigue)
+    val textColor = getTextColor(baseColor = MaterialTheme.colorScheme.onPrimaryContainer, fatigue)
+    val imageAlpha = getImageAlpha(fatigue)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp))
-            .background(brush = backgroundGradient, shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(20.dp))
+            .background(color = backgroundColor)
             .clickable { onClick() }
             .padding(12.dp)
             .animateContentSize(),
@@ -59,7 +64,9 @@ fun MuscleItem(
                 Image(
                     painter = painterResource(it),
                     modifier = Modifier.size(80.dp)
-                        .background(color = Color.Gray, shape = RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(color = MaterialTheme.colorScheme.surface)
+                        .alpha(imageAlpha)
                         .padding(4.dp),
                     contentDescription = null
                 )
@@ -68,8 +75,8 @@ fun MuscleItem(
             Column {
                 Text(
                     text = muscleInfo.muscle.name,
-                    color = Color.White,
-                    fontSize = 28.sp,
+                    color = textColor,
+                    style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                 )
 
@@ -77,7 +84,7 @@ fun MuscleItem(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Recovery in: ${formatRemainingTime(muscleInfo.expectedRecovery)}",
-                        color = Color.White.copy(alpha = 0.9f),
+                        color = textColor,
                         fontSize = 16.sp
                     )
                 }
@@ -101,31 +108,43 @@ private fun formatRemainingTime(expectedRecoveryTimestamp: Long): String {
     }
 }
 
-private fun getFatigueGradient(fatigue: Float): Brush {
-    val colorStart: Color
-    val colorEnd: Color
-
-    when {
-        fatigue <= 33 -> {
-            colorStart = Color(0xFF1B5E20)
-            colorEnd = Color(0xFF66BB6A)
-        }
-        fatigue <= 66 -> {
-            colorStart = Color(0xFFF9A825)
-            colorEnd = Color(0xFFFFF176)
-        }
-        else -> { // Red range
-            colorStart = Color(0xFFC62828)
-            colorEnd = Color(0xFFFF5252)
-        }
+@Composable
+private fun getBgColor(baseColor: Color, fatigue: Float, isDarkTheme: Boolean = isSystemInDarkTheme()): Color {
+    val factor = when {
+        fatigue in 0f..10f -> if (isDarkTheme) 1.5f else 0.7f  // Not tired or very lightly tired - original color
+        fatigue in 11f..33f -> if (isDarkTheme) 1.0f else 0.75f // A bit tired
+        fatigue in 34f..70f -> if (isDarkTheme) 0.5f else 0.9f // Moderately tired
+        fatigue > 70f -> if (isDarkTheme) 0.3f else 1.0f       // Very tired
+        else -> 1.0f
     }
 
-    return Brush.linearGradient(
-        colors = listOf(colorStart, colorEnd),
-        start = androidx.compose.ui.geometry.Offset(0f, 0f),
-        end = androidx.compose.ui.geometry.Offset(800f, 400f), // Diagonal direction
-        tileMode = TileMode.Mirror
-    )
+    return baseColor.adjustBrightness(factor)
+}
+
+@Composable
+private fun getTextColor(baseColor: Color, fatigue: Float, isDarkTheme: Boolean = isSystemInDarkTheme()): Color {
+    val alpha = when {
+        fatigue in 0f..10f -> if (isDarkTheme) 1.0f else 1.0f  // Not tired or very lightly tired - original color
+        fatigue in 11f..33f -> if (isDarkTheme) 1.0f else 1.0f // A bit tired
+        fatigue in 34f..70f -> if (isDarkTheme) 0.7f else 0.8f // Moderately tired
+        fatigue > 70f -> if (isDarkTheme) 0.6f else 0.7f       // Very tired
+        else -> 1.0f
+    }
+
+    return baseColor.copy(alpha = alpha)
+}
+
+@Composable
+private fun getImageAlpha(fatigue: Float, isDarkTheme: Boolean = isSystemInDarkTheme()): Float {
+    val alpha = when {
+        fatigue in 0f..10f -> if (isDarkTheme) 1.0f else 1.0f  // Not tired or very lightly tired - original color
+        fatigue in 11f..33f -> if (isDarkTheme) 1.0f else 1.0f // A bit tired
+        fatigue in 34f..70f -> if (isDarkTheme) 0.7f else 0.8f // Moderately tired
+        fatigue > 70f -> if (isDarkTheme) 0.6f else 0.7f       // Very tired
+        else -> 1.0f
+    }
+
+    return alpha
 }
 
 @Composable

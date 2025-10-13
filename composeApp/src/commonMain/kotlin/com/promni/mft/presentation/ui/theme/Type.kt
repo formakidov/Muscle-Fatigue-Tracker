@@ -3,33 +3,10 @@ package com.promni.mft.presentation.ui.theme
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.FontFamily
 
-//import androidx.compose.ui.text.googlefonts.GoogleFont
-//import androidx.compose.ui.text.googlefonts.Font
+val bodyFontFamily = FontFamily.Serif
 
-//val provider = GoogleFont.Provider(
-//    providerAuthority = "com.google.android.gms.fonts",
-//    providerPackage = "com.google.android.gms",
-//    certificates = R.array.com_google_android_gms_fonts_certs
-//)
+val displayFontFamily = FontFamily.Serif
 
-// todo add google fonts
-val bodyFontFamily = FontFamily.SansSerif
-//val bodyFontFamily = FontFamily(
-//    Font(
-//        googleFont = GoogleFont("Lexend"),
-//        fontProvider = provider,
-//    )
-//)
-
-val displayFontFamily = FontFamily.Monospace
-//val displayFontFamily = FontFamily(
-//    Font(
-//        googleFont = GoogleFont("Bebas Neue"),
-//        fontProvider = provider,
-//    )
-//)
-
-// Default Material 3 typography values
 val baseline = Typography()
 
 val Typography = Typography(
