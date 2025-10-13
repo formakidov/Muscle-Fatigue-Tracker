@@ -167,8 +167,9 @@ fun MusclesListContent(
             ) {
                 items(musclesInfo, key = { it.muscle.id }) { muscleInfo ->
                     MuscleItem(
+                        modifier = Modifier.animateItem(),
                         muscleInfo = muscleInfo,
-                        onClick = { onMuscleSelected(muscleInfo) },
+                        onClick = { onMuscleSelected(muscleInfo) }
                     )
                 }
             }

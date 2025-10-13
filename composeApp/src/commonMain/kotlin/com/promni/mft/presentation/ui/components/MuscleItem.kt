@@ -39,13 +39,14 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun MuscleItem(
+    modifier: Modifier = Modifier,
     muscleInfo: MuscleInfo,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     val backgroundGradient = getFatigueGradient(muscleInfo.fatigue)
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp))
             .background(brush = backgroundGradient, shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
