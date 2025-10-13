@@ -7,10 +7,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -53,18 +56,19 @@ fun EditableRecoveryPeriod(
     val initialRecoveryPeriodDays =
         (muscleInfo.totalRecoveryTime / (24 * 60 * 60 * 1000)).toString()
 
+    val textFieldMaxHeight = 56.dp
+    val buttonMinWidth = 90.dp
+
     val isInputValid = recoveryPeriodInput.toIntOrNull() in 1..60
 
     Row(
-        modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 56.dp),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AnimatedContent(
             modifier = Modifier.weight(1f),
             targetState = isEditing,
-            transitionSpec = {
-                fadeIn() togetherWith fadeOut()
-            }
+            transitionSpec = { fadeIn() togetherWith fadeOut() }
         ) { editing ->
             if (editing) {
                 TextField(
@@ -72,7 +76,9 @@ fun EditableRecoveryPeriod(
                     onValueChange = { recoveryPeriodInput = it },
                     label = { Text("Recovery (days)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = textFieldMaxHeight),
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
                 )
             } else {
@@ -83,12 +89,15 @@ fun EditableRecoveryPeriod(
             }
         }
 
-        Spacer(modifier = Modifier.padding(start = 16.dp))
-
         AnimatedContent(
+            modifier = modifier
+                .height(IntrinsicSize.Min)
+                .defaultMinSize(minHeight = textFieldMaxHeight)
+                .padding(start = 16.dp),
             targetState = isEditing,
             transitionSpec = {
-                (slideInHorizontally { width -> width } + fadeIn()).togetherWith(slideOutHorizontally { width -> -width } + fadeOut())
+                (slideInHorizontally { it } + fadeIn())
+                    .togetherWith(slideOutHorizontally { -it } + fadeOut())
                     .using(SizeTransform(clip = false))
             },
             contentAlignment = Alignment.Center,
@@ -96,7 +105,9 @@ fun EditableRecoveryPeriod(
             if (editing) {
                 Row {
                     Button(
-                        modifier = Modifier.widthIn(min = 90.dp).heightIn(min = 56.dp),
+                        modifier = Modifier
+                            .widthIn(min = buttonMinWidth)
+                            .fillMaxHeight(),
                         onClick = {
                             if (isInputValid) {
                                 val newRecoveryPeriod = recoveryPeriodInput.toInt()
@@ -113,7 +124,9 @@ fun EditableRecoveryPeriod(
                     }
                     Spacer(modifier = Modifier.width(2.dp))
                     Button(
-                        modifier = Modifier.widthIn(min = 90.dp).heightIn(min = 56.dp),
+                        modifier = Modifier
+                            .widthIn(min = buttonMinWidth)
+                            .fillMaxHeight(),
                         onClick = {
                             isEditing = false
                             recoveryPeriodInput = initialRecoveryPeriodDays
@@ -128,7 +141,9 @@ fun EditableRecoveryPeriod(
                 }
             } else {
                 Button(
-                    modifier = Modifier.widthIn(min = 90.dp).heightIn(min = 56.dp),
+                    modifier = Modifier
+                        .widthIn(min = buttonMinWidth)
+                        .fillMaxHeight(),
                     onClick = { isEditing = true },
                 ) {
                     Text(text = "Change")
