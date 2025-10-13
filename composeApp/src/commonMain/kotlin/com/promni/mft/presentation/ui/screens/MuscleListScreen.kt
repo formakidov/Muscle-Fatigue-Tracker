@@ -146,7 +146,7 @@ fun MusclesListContent(
 
     val columnsCount = when (widthSizeClass) {
         WindowWidthSizeClass.Medium -> 2
-        WindowWidthSizeClass.Expanded -> 3
+        WindowWidthSizeClass.Expanded -> 2
         else -> 1
     }
     val safePaddings = WindowInsets.safeDrawing.asPaddingValues()

@@ -203,7 +203,7 @@ private fun WeeklyFatigueGraph(
 @Composable
 private fun getBarBgColor(color: Color, fatigue: Float, isDarkTheme: Boolean = isSystemInDarkTheme()): Color {
     val factor = when {
-        fatigue in 0f..10f -> if (isDarkTheme) 0.7f else 1.3f  // Not tired or very lightly tired - original color
+        fatigue in 0f..10f -> if (isDarkTheme) 0.7f else 1.3f  // Not tired or very lightly tired
         fatigue in 11f..33f -> if (isDarkTheme) 0.8f else 1.2f // A bit tired
         fatigue in 34f..70f -> if (isDarkTheme) 0.9f else 0.9f // Moderately tired
         fatigue > 70f -> if (isDarkTheme) 1.0f else 0.8f       // Very tired
