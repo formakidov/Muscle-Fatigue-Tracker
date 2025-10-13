@@ -18,7 +18,7 @@ import androidx.room.PrimaryKey
     indices = [Index(value = ["muscleId"], unique = true)]
 )
 data class ExpectedRecoveryEntity(
-    @PrimaryKey val muscleId: MuscleId,
+    @PrimaryKey val muscleId: Long,
     val timestamp: Long,
     val lastUpdated: Long
 )

@@ -16,7 +16,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,13 +32,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.promni.mft.domain.model.MuscleInfo
 import com.promni.mft.domain.repository.MuscleFilter
 import com.promni.mft.presentation.ui.components.FilterSegmentedButton
-import com.promni.mft.presentation.ui.components.MuscleDetailsBottomSheet
+import com.promni.mft.presentation.ui.components.MuscleDetails
 import com.promni.mft.presentation.ui.components.MuscleItem
 import com.promni.mft.presentation.ui.theme.AppTheme
 import com.promni.mft.presentation.ui.utils.DevicePreviews
 import com.promni.mft.presentation.ui.utils.allMuscles
 import com.promni.mft.presentation.ui.utils.getWindowSizeClass
-import com.promni.mft.presentation.viewmodel.MuscleUiState
+import com.promni.mft.presentation.viewmodel.MusclesListUiState
 import com.promni.mft.presentation.viewmodel.MusclesListViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -48,12 +47,12 @@ fun MuscleListScreen(
     modifier: Modifier = Modifier,
     viewModel: MusclesListViewModel = koinViewModel()
 ) {
-    val muscleUiState by viewModel.muscleUiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val muscleFilter by viewModel.muscleFilter.collectAsStateWithLifecycle()
 
     MuscleListScreen(
         modifier = modifier,
-        uiState = muscleUiState,
+        uiState = uiState,
         muscleFilter = muscleFilter,
         onFilterSelected = viewModel::setMuscleFilter
     )
@@ -64,42 +63,29 @@ fun MuscleListScreen(
 @Composable
 fun MuscleListScreen(
     modifier: Modifier,
-    uiState: MuscleUiState,
+    uiState: MusclesListUiState,
     muscleFilter: MuscleFilter,
     onFilterSelected: (MuscleFilter) -> Unit
 ) {
     var selectedMuscleId by remember { mutableStateOf<Long?>(null) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val lazyGridState = rememberLazyGridState()
 
     // Scroll to top when the filter changes
     LaunchedEffect(muscleFilter) {
-        lazyGridState.scrollToItem(0)
+        lazyGridState.animateScrollToItem(0)
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
-        when (uiState) {
-            is MuscleUiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
+    when (uiState) {
+        is MusclesListUiState.Loading -> {
+            LoadingView()
+        }
 
-            is MuscleUiState.Error -> {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("Error loading muscles")
-                    Text(uiState.exception.toString())
-                }
-            }
+        is MusclesListUiState.Error -> {
+            ErrorView(exception = uiState.exception)
+        }
 
-            is MuscleUiState.Success -> {
+        is MusclesListUiState.Success -> {
+            Box(modifier = modifier.fillMaxSize()) {
                 MusclesListContent(
                     musclesInfo = uiState.musclesInfo,
                     onMuscleSelected = { selectedMuscleId = it.muscle.id },
@@ -108,19 +94,36 @@ fun MuscleListScreen(
                     onFilterSelected = onFilterSelected
                 )
 
-                val selectedMuscle = selectedMuscleId?.let { id ->
-                    uiState.musclesInfo.find { it.muscle.id == id }
-                }
-
-                if (selectedMuscle != null) {
-                    MuscleDetailsBottomSheet(
-                        muscleInfo = selectedMuscle,
-                        sheetState = sheetState,
+                if (selectedMuscleId != null) {
+                    MuscleDetails(
+                        muscleId = selectedMuscleId!!,
                         onDismiss = { selectedMuscleId = null }
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun LoadingView() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun ErrorView(exception: Throwable) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Error loading muscles")
+        Text(exception.toString())
     }
 }
 
@@ -132,16 +135,6 @@ fun MusclesListContent(
     muscleFilter: MuscleFilter,
     onFilterSelected: (MuscleFilter) -> Unit
 ) {
-    if (musclesInfo.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("No muscles found for this filter.")
-        }
-        return
-    }
-
     val density = LocalDensity.current
     var filterHeight by remember { mutableStateOf(0.dp) }
     val contentPadding = PaddingValues(
@@ -157,18 +150,28 @@ fun MusclesListContent(
         else -> 1
     }
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyVerticalGrid(
-            state = lazyGridState,
-            columns = GridCells.Fixed(columnsCount),
-            contentPadding = contentPadding,
-            verticalArrangement = Arrangement.spacedBy(itemSpacing),
-            horizontalArrangement = Arrangement.spacedBy(itemSpacing)
-        ) {
-            items(musclesInfo, key = { it.muscle.id }) { muscleInfo ->
-                MuscleItem(
-                    muscleInfo = muscleInfo,
-                    onClick = { onMuscleSelected(muscleInfo) },
-                )
+        if (musclesInfo.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("No muscles found for this filter.")
+            }
+        } else {
+            LazyVerticalGrid(
+                state = lazyGridState,
+                columns = GridCells.Fixed(columnsCount),
+                contentPadding = contentPadding,
+                verticalArrangement = Arrangement.spacedBy(itemSpacing),
+                horizontalArrangement = Arrangement.spacedBy(itemSpacing)
+            ) {
+                items(musclesInfo, key = { it.muscle.id }) { muscleInfo ->
+                    MuscleItem(
+                        modifier = Modifier.animateItem(),
+                        muscleInfo = muscleInfo,
+                        onClick = { onMuscleSelected(muscleInfo) }
+                    )
+                }
             }
         }
 
@@ -192,7 +195,7 @@ fun MusclesListContent(
 @Composable
 private fun ThemedMuscleListScreenPreview(
     darkTheme: Boolean,
-    uiState: MuscleUiState,
+    uiState: MusclesListUiState,
     modifier: Modifier = Modifier
 ) {
     AppTheme(darkTheme = darkTheme, dynamicColor = false) {
@@ -211,34 +214,34 @@ private fun ThemedMuscleListScreenPreview(
 @Composable
 private fun MuscleListScreenSuccessLightPreview() = ThemedMuscleListScreenPreview(
     darkTheme = false,
-    uiState = MuscleUiState.Success(allMuscles),
+    uiState = MusclesListUiState.Success(allMuscles),
 )
 
 @DevicePreviews
 @Composable
 private fun MuscleListScreenSuccessDarkPreview() = ThemedMuscleListScreenPreview(
     darkTheme = true,
-    uiState = MuscleUiState.Success(allMuscles),
+    uiState = MusclesListUiState.Success(allMuscles),
 )
 
 @DevicePreviews
 @Composable
 private fun MuscleListScreenLoadingLightPreview() =
-    ThemedMuscleListScreenPreview(darkTheme = false, uiState = MuscleUiState.Loading)
+    ThemedMuscleListScreenPreview(darkTheme = false, uiState = MusclesListUiState.Loading)
 
 @DevicePreviews
 @Composable
 private fun MuscleListScreenLoadingDarkPreview() =
-    ThemedMuscleListScreenPreview(darkTheme = true, uiState = MuscleUiState.Loading)
+    ThemedMuscleListScreenPreview(darkTheme = true, uiState = MusclesListUiState.Loading)
 
 @DevicePreviews
 @Composable
 private fun MuscleListScreenErrorLightPreview() = ThemedMuscleListScreenPreview(
-    darkTheme = false, uiState = MuscleUiState.Error(Exception("Preview Error"))
+    darkTheme = false, uiState = MusclesListUiState.Error(Exception("Preview Error"))
 )
 
 @DevicePreviews
 @Composable
 private fun MuscleListScreenErrorDarkPreview() = ThemedMuscleListScreenPreview(
-    darkTheme = true, uiState = MuscleUiState.Error(Exception("Preview Error"))
+    darkTheme = true, uiState = MusclesListUiState.Error(Exception("Preview Error"))
 )

@@ -2,15 +2,14 @@ package com.promni.mft.domain.usecase
 
 import com.promni.mft.domain.repository.ExpectedRecoveryRepository
 import com.promni.mft.domain.repository.MuscleRepository
-import com.promni.mft.domain.util.MuscleId
-import com.promni.mft.domain.util.Recovery
+
 import com.promni.mft.domain.util.RecoveryCalculator
 
 class SetTotalRecoveryTimeUseCase(
     private val muscleRepository: MuscleRepository,
     private val expectedRecoveryRepository: ExpectedRecoveryRepository
 ) {
-    suspend operator fun invoke(muscleId: MuscleId, newTotalRecoveryTime: Recovery) {
+    suspend operator fun invoke(muscleId: Long, newTotalRecoveryTime: Long) {
         val currentTotalRecoveryTime = muscleRepository.currentTotalRecoveryTime(muscleId)
         muscleRepository.setTotalRecoveryTime(muscleId, newTotalRecoveryTime)
 

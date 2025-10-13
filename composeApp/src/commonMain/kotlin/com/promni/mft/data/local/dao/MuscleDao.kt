@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import com.promni.mft.data.local.entities.MuscleEntity
-import com.promni.mft.data.local.entities.MuscleId
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -14,7 +13,10 @@ interface MuscleDao {
     fun all(): Flow<List<MuscleEntity>>
 
     @Query("SELECT * FROM muscles WHERE id = :muscleId LIMIT 1")
-    suspend fun item(muscleId: MuscleId): MuscleEntity?
+    suspend fun item(muscleId: Long): MuscleEntity?
+
+    @Query("SELECT * FROM muscles WHERE id = :muscleId LIMIT 1")
+    fun observeItem(muscleId: Long): Flow<MuscleEntity?>
 
     @Upsert
     suspend fun upsert(muscle: MuscleEntity)

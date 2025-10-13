@@ -14,7 +14,6 @@ import com.promni.mft.data.local.entities.DefaultTotalRecoveryTime
 import com.promni.mft.data.local.entities.ExpectedRecoveryEntity
 import com.promni.mft.data.local.entities.FatigueLogEntity
 import com.promni.mft.data.local.entities.MuscleEntity
-import com.promni.mft.data.local.entities.MuscleId
 import com.promni.mft.defaultMusclesNames
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -98,7 +97,7 @@ private fun getMusclePrepopulationSql() =
         separator = ", "
     )
 
-private fun generateFatigueLogEntries(muscleId: MuscleId, offsetDays: Int = 0): List<FatigueLogEntity> {
+private fun generateFatigueLogEntries(muscleId: Long, offsetDays: Int = 0): List<FatigueLogEntity> {
     val now = Clock.System.now()
     val timeZone = TimeZone.currentSystemDefault()
     val baseTime = now.minus(offsetDays, DateTimeUnit.DAY, timeZone)

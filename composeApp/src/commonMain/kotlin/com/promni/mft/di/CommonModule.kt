@@ -3,8 +3,9 @@ package com.promni.mft.di
 import com.promni.mft.domain.usecase.ChangeMuscleFatigueUseCase
 import com.promni.mft.domain.usecase.DeleteFatigueLogUseCase
 import com.promni.mft.domain.usecase.GetFatigueLogsUseCase
+import com.promni.mft.domain.usecase.GetMuscleByIdUseCase
 import com.promni.mft.domain.usecase.GetMuscleFilterUseCase
-import com.promni.mft.domain.usecase.GetMuscleInfoUseCase
+import com.promni.mft.domain.usecase.GetMusclesInfoUseCase
 import com.promni.mft.domain.usecase.SetMuscleFilterUseCase
 import com.promni.mft.domain.usecase.SetTotalRecoveryTimeUseCase
 import com.promni.mft.domain.util.MuscleInfoSorter
@@ -14,13 +15,14 @@ import org.koin.dsl.module
 val commonModule = module {
 
     // Use Cases
-    singleOf(::GetMuscleInfoUseCase)
+    singleOf(::GetMusclesInfoUseCase)
     singleOf(::GetFatigueLogsUseCase)
     singleOf(::ChangeMuscleFatigueUseCase)
     singleOf(::SetTotalRecoveryTimeUseCase)
     singleOf(::DeleteFatigueLogUseCase)
     singleOf(::GetMuscleFilterUseCase)
     singleOf(::SetMuscleFilterUseCase)
+    singleOf(::GetMuscleByIdUseCase)
 
     // Sorting
     singleOf(::MuscleInfoSorter)

@@ -5,17 +5,17 @@ import kotlin.math.exp
 
 object RecoveryCalculator {
 
-    fun calculateExpectedRecoveryFromNow(fatigue: Float, totalRecoveryTime: Recovery): Long {
+    fun calculateExpectedRecoveryFromNow(fatigue: Float, totalRecoveryTime: Long): Long {
         val recoveryTimeMillis = (totalRecoveryTime * (fatigue / 100f)).toLong()
         return SystemTime.nowMillis() + recoveryTimeMillis
     }
 
-    fun calculateExpectedRecoveryFromLog(log: FatigueLog, totalRecoveryTime: Recovery): Long {
+    fun calculateExpectedRecoveryFromLog(log: FatigueLog, totalRecoveryTime: Long): Long {
         val recoveryTimeMillis = (totalRecoveryTime * (log.value / 100f)).toLong()
         return log.timestamp + recoveryTimeMillis
     }
 
-    fun calculateCurrentFatigue(expectedRecoveryTimestamp: Long?, totalRecoveryTime: Recovery): Float {
+    fun calculateCurrentFatigue(expectedRecoveryTimestamp: Long?, totalRecoveryTime: Long): Float {
         if (expectedRecoveryTimestamp == null) return 0f
         return (100f * (expectedRecoveryTimestamp - SystemTime.nowMillis()) / totalRecoveryTime).coerceIn(0f, 100f)
     }

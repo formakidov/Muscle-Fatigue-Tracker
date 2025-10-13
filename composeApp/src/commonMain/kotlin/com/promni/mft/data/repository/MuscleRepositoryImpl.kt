@@ -4,8 +4,6 @@ import com.promni.mft.data.local.dao.ExpectedRecoveryDao
 import com.promni.mft.data.local.dao.MuscleDao
 import com.promni.mft.data.local.entities.ExpectedRecoveryEntity
 import com.promni.mft.data.local.entities.MuscleEntity
-import com.promni.mft.data.local.entities.MuscleId
-import com.promni.mft.data.local.entities.Recovery
 import com.promni.mft.data.local.entities.asExternalModel
 import com.promni.mft.domain.MuscleNotFoundException
 import com.promni.mft.domain.model.MuscleInfo
@@ -21,7 +19,7 @@ class MuscleRepositoryImpl(
 ) : MuscleRepository {
 
     override fun observeMuscles(): Flow<List<MuscleInfo>> {
-        val muscles: Flow<List<MuscleEntity>> = muscleDao.all()
+        val muscles = muscleDao.all()
         val expectedRecoveries = expectedRecoveryDao.all()
             .map { entities -> entities.associateBy(ExpectedRecoveryEntity::muscleId) }
 
@@ -32,12 +30,25 @@ class MuscleRepositoryImpl(
         }
     }
 
-    override suspend fun setTotalRecoveryTime(muscleId: MuscleId, newTotalRecovery: Recovery) {
+    override fun observeMuscle(id: Long): Flow<MuscleInfo> {
+        val muscle = muscleDao.observeItem(id)
+        val expectedRecovery = expectedRecoveryDao.observeItem(id)
+
+        return combine(muscle, expectedRecovery) { muscle, expectedRecovery ->
+            if (muscle == null) {
+                throw MuscleNotFoundException(id)
+            }
+
+            buildMuscleInfo(muscle, expectedRecovery)
+        }
+    }
+
+    override suspend fun setTotalRecoveryTime(muscleId: Long, newTotalRecovery: Long) {
         val muscle = muscleDao.item(muscleId) ?: throw MuscleNotFoundException(muscleId)
         muscleDao.upsert(muscle.copy(totalRecoveryMillis = newTotalRecovery))
     }
 
-    override suspend fun currentTotalRecoveryTime(id: MuscleId) =
+    override suspend fun currentTotalRecoveryTime(id: Long) =
         muscleDao.item(id)?.totalRecovery ?: throw MuscleNotFoundException(id)
 
     private fun buildMuscleInfo(
