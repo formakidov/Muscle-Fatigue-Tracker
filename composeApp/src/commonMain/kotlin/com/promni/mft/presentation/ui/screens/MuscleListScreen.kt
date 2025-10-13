@@ -4,9 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -25,8 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.promni.mft.domain.model.MuscleInfo
@@ -75,17 +80,17 @@ fun MuscleListScreen(
         lazyGridState.animateScrollToItem(0)
     }
 
-    when (uiState) {
-        is MusclesListUiState.Loading -> {
-            LoadingView()
-        }
+    Surface(modifier = modifier.fillMaxSize()) {
+        when (uiState) {
+            is MusclesListUiState.Loading -> {
+                LoadingView()
+            }
 
-        is MusclesListUiState.Error -> {
-            ErrorView(exception = uiState.exception)
-        }
+            is MusclesListUiState.Error -> {
+                ErrorView(exception = uiState.exception)
+            }
 
-        is MusclesListUiState.Success -> {
-            Box(modifier = modifier.fillMaxSize()) {
+            is MusclesListUiState.Success -> {
                 MusclesListContent(
                     musclesInfo = uiState.musclesInfo,
                     onMuscleSelected = { selectedMuscleId = it.muscle.id },
@@ -135,11 +140,6 @@ fun MusclesListContent(
     muscleFilter: MuscleFilter,
     onFilterSelected: (MuscleFilter) -> Unit
 ) {
-    val density = LocalDensity.current
-    var filterHeight by remember { mutableStateOf(0.dp) }
-    val contentPadding = PaddingValues(
-        bottom = filterHeight + 32.dp, start = 16.dp, end = 16.dp, top = 16.dp
-    )
     val windowSizeClass = getWindowSizeClass()
     val widthSizeClass = windowSizeClass.widthSizeClass
     val itemSpacing = 12.dp
@@ -149,6 +149,10 @@ fun MusclesListContent(
         WindowWidthSizeClass.Expanded -> 3
         else -> 1
     }
+    val safePaddings = WindowInsets.safeDrawing.asPaddingValues()
+    val systemBarsPaddings = WindowInsets.systemBars.asPaddingValues()
+    val layoutDirection = LocalLayoutDirection.current
+
     Box(modifier = Modifier.fillMaxSize()) {
         if (musclesInfo.isEmpty()) {
             Box(
@@ -158,10 +162,16 @@ fun MusclesListContent(
                 Text("No muscles found for this filter.")
             }
         } else {
+            val gridContentPaddings = PaddingValues(
+                start = maxOf(safePaddings.calculateStartPadding(layoutDirection), 16.dp),
+                top = systemBarsPaddings.calculateTopPadding() + 16.dp,
+                end = maxOf(safePaddings.calculateEndPadding(layoutDirection), 16.dp),
+                bottom = 120.dp
+            )
             LazyVerticalGrid(
                 state = lazyGridState,
+                contentPadding = gridContentPaddings,
                 columns = GridCells.Fixed(columnsCount),
-                contentPadding = contentPadding,
                 verticalArrangement = Arrangement.spacedBy(itemSpacing),
                 horizontalArrangement = Arrangement.spacedBy(itemSpacing)
             ) {
@@ -175,16 +185,17 @@ fun MusclesListContent(
             }
         }
 
+        val filterButtonContentPaddings = PaddingValues(
+            start = maxOf(safePaddings.calculateLeftPadding(layoutDirection), 16.dp),
+            top = 0.dp,
+            end = maxOf(safePaddings.calculateRightPadding(layoutDirection), 16.dp),
+            bottom = systemBarsPaddings.calculateBottomPadding() + 16.dp
+        )
         FilterSegmentedButton(
             modifier = Modifier
-                .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(16.dp)
-                .onSizeChanged {
-                    with(density) {
-                        filterHeight = it.height.toDp()
-                    }
-                },
+                .fillMaxWidth()
+                .padding(filterButtonContentPaddings),
             selectedFilter = muscleFilter,
             onFilterSelected = onFilterSelected
         )

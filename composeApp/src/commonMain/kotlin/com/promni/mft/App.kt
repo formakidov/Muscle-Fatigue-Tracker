@@ -1,7 +1,6 @@
 package com.promni.mft
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,7 +17,7 @@ fun App(
         dynamicColor = dynamicColor
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            MuscleListScreen(modifier = Modifier.padding(innerPadding))
+            MuscleListScreen(modifier = Modifier)
         }
     }
 }
