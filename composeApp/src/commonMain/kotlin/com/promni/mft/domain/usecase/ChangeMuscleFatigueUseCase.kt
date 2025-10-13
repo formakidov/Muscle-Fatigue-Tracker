@@ -3,7 +3,6 @@ package com.promni.mft.domain.usecase
 import com.promni.mft.domain.repository.ExpectedRecoveryRepository
 import com.promni.mft.domain.repository.FatigueLogRepository
 import com.promni.mft.domain.repository.MuscleRepository
-import com.promni.mft.domain.util.MuscleId
 import com.promni.mft.domain.util.RecoveryCalculator
 
 class ChangeMuscleFatigueUseCase(
@@ -12,7 +11,7 @@ class ChangeMuscleFatigueUseCase(
     private val expectedRecoveryRepository: ExpectedRecoveryRepository
 ) {
     suspend operator fun invoke(
-        muscleId: MuscleId,
+        muscleId: Long,
         newValue: Float,
     ) {
         if (newValue !in 0f..100f) throw IllegalArgumentException("Fatigue value must be between 0 and 100")

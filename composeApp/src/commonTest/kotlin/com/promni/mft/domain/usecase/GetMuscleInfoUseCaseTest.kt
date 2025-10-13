@@ -22,7 +22,7 @@ class GetMuscleInfoUseCaseTest {
     private val muscleInfoSorter: MuscleInfoSorter = mock()
     private val userDataRepository: UserDataRepository = mock()
 
-    private val getMuscleInfoUseCase = GetMuscleInfoUseCase(
+    private val getMusclesInfoUseCase = GetMusclesInfoUseCase(
         muscleRepository,
         userDataRepository,
         muscleInfoSorter
@@ -47,7 +47,7 @@ class GetMuscleInfoUseCaseTest {
         every { muscleInfoSorter.sort(unsortedMuscleInfoList) } returns sortedMuscleInfoList
 
         // When
-        val result = getMuscleInfoUseCase.invoke().first()
+        val result = getMusclesInfoUseCase.invoke().first()
 
         // Then
         verify { muscleRepository.observeMuscles() }
@@ -63,7 +63,7 @@ class GetMuscleInfoUseCaseTest {
         every { muscleInfoSorter.sort(emptyList()) } returns emptyList()
 
         // When
-        val result = getMuscleInfoUseCase.invoke().first()
+        val result = getMusclesInfoUseCase.invoke().first()
 
         // Then
         verify { muscleRepository.observeMuscles() }

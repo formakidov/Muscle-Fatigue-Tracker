@@ -8,7 +8,7 @@ import com.promni.mft.domain.util.MuscleInfoSorter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
-class GetMuscleInfoUseCase(
+class GetMusclesInfoUseCase(
     private val muscleRepository: MuscleRepository,
     private val userDataRepository: UserDataRepository,
     private val muscleInfoSorter: MuscleInfoSorter

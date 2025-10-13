@@ -2,7 +2,6 @@ package com.promni.mft.data.repository
 
 import com.promni.mft.data.local.dao.FatigueLogDao
 import com.promni.mft.data.local.entities.FatigueLogEntity
-import com.promni.mft.data.local.entities.MuscleId
 import com.promni.mft.data.local.entities.asExternalModel
 import com.promni.mft.domain.model.FatigueLog
 import com.promni.mft.domain.repository.FatigueLogRepository
@@ -19,19 +18,19 @@ class FatigueLogRepositoryImpl(
     private val fatigueLogDao: FatigueLogDao
 ) : FatigueLogRepository {
 
-    override fun getFatigueLogsForMuscle(muscleId: MuscleId): Flow<List<FatigueLog>> =
+    override fun getFatigueLogsForMuscle(muscleId: Long): Flow<List<FatigueLog>> =
         fatigueLogDao.getLogsForMuscle(muscleId).map { it.map(FatigueLogEntity::asExternalModel) }
 
-    override suspend fun getLatestLogForMuscle(muscleId: MuscleId): FatigueLog? =
+    override suspend fun getLatestLogForMuscle(muscleId: Long): FatigueLog? =
         fatigueLogDao.getLatestLogForMuscle(muscleId)?.asExternalModel()
 
-    override suspend fun addFatigueLog(muscleId: MuscleId, value: Float) {
+    override suspend fun addFatigueLog(muscleId: Long, value: Float) {
         fatigueLogDao.insertFatigueLog(
             FatigueLogEntity(muscleId = muscleId, value = value, timestamp = SystemTime.nowMillis())
         )
     }
 
-    override suspend fun deleteLog(muscleId: MuscleId, date: LocalDate) {
+    override suspend fun deleteLog(muscleId: Long, date: LocalDate) {
         val zone = TimeZone.currentSystemDefault()
         val startOfDay = date.atStartOfDayIn(zone).toEpochMilliseconds()
         val endOfDay = date.plus(1, DateTimeUnit.DAY).atStartOfDayIn(zone).toEpochMilliseconds()

@@ -20,7 +20,7 @@ import com.promni.mft.domain.model.FatigueLog
 )
 data class FatigueLogEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val muscleId: MuscleId,
+    val muscleId: Long,
     val value: Float,
     val timestamp: Long
 )

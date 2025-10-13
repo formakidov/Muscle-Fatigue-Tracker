@@ -16,7 +16,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -25,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -35,38 +35,53 @@ import com.promni.mft.domain.model.FatigueLog
 import com.promni.mft.domain.model.MuscleInfo
 import com.promni.mft.presentation.ui.theme.AppTheme
 import com.promni.mft.presentation.ui.utils.DevicePreviews
+import com.promni.mft.presentation.ui.utils.fatigueLogs
 import com.promni.mft.presentation.ui.utils.muscleTricepsMiddleTrained
-import com.promni.mft.presentation.viewmodel.FatigueLogUiState
+import com.promni.mft.presentation.viewmodel.MuscleDetailsUiState
 import com.promni.mft.presentation.viewmodel.MuscleDetailsViewModel
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MuscleDetailsBottomSheet(
-    muscleInfo: MuscleInfo,
-    sheetState: SheetState,
+fun MuscleDetails(
+    muscleId: Long,
     onDismiss: () -> Unit,
     viewModel: MuscleDetailsViewModel = koinViewModel(
-        key = muscleInfo.muscle.id.toString(),
-        parameters = { parametersOf(muscleInfo.muscle.id) }
+        key = muscleId.toString(),
+        parameters = { parametersOf(muscleId) }
     )
 ) {
-    val fatigueLogUiState by viewModel.fatigueLogUiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val dismissSheet: () -> Unit = {
+        scope.launch {
+            sheetState.hide()
+        }.invokeOnCompletion {
+            if (!sheetState.isVisible) {
+                onDismiss()
+            }
+        }
+    }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = dismissSheet,
         sheetState = sheetState,
     ) {
-        when (val uiState = fatigueLogUiState) {
-            is FatigueLogUiState.Loading -> CircularProgressIndicator()
-            is FatigueLogUiState.Error -> Text("Error loading logs.")
-            is FatigueLogUiState.Success -> {
+        when (val uiState = uiState) {
+            is MuscleDetailsUiState.Loading -> CircularProgressIndicator()
+            is MuscleDetailsUiState.Error -> Text("Error loading muscle details.")
+            is MuscleDetailsUiState.Success -> {
                 MuscleDetailsContent(
-                    muscleInfo = muscleInfo,
+                    muscleInfo = uiState.muscleInfo,
                     logs = uiState.logs,
-                    onFatigueChanged = viewModel::setFatigue,
+                    onFatigueChanged = {
+                        viewModel.setFatigue(it);
+                        dismissSheet()
+                    },
                     onRecoveryPeriodChanged = viewModel::setRecoveryPeriod,
                     onDeleteLog = viewModel::deleteLog,
                 )
@@ -161,17 +176,14 @@ private fun FatigueLogDropDownMenu(
 }
 
 @Composable
-private fun ThemedMuscleDetailsBottomSheetPreview(
-    darkTheme: Boolean,
-    skipPartiallyExpanded: Boolean,
-) {
+private fun ThemedMuscleDetailsBottomSheetPreview(darkTheme: Boolean) {
     AppTheme(darkTheme = darkTheme, dynamicColor = false) {
-        MuscleDetailsBottomSheet(
+        MuscleDetailsContent(
             muscleInfo = muscleTricepsMiddleTrained,
-            sheetState = rememberModalBottomSheetState(
-                skipPartiallyExpanded = skipPartiallyExpanded
-            ),
-            onDismiss = {},
+            logs = fatigueLogs,
+            onFatigueChanged = {},
+            onRecoveryPeriodChanged = {},
+            onDeleteLog = {}
         )
     }
 }
@@ -179,20 +191,20 @@ private fun ThemedMuscleDetailsBottomSheetPreview(
 @DevicePreviews
 @Composable
 private fun MuscleDetailsBottomSheetExpandedDarkPreview() =
-    ThemedMuscleDetailsBottomSheetPreview(darkTheme = true, skipPartiallyExpanded = false)
+    ThemedMuscleDetailsBottomSheetPreview(darkTheme = true)
 
 @DevicePreviews
 @Composable
 private fun MuscleDetailsBottomSheetExpandedLightPreview() =
-    ThemedMuscleDetailsBottomSheetPreview(darkTheme = false, skipPartiallyExpanded = false)
+    ThemedMuscleDetailsBottomSheetPreview(darkTheme = false)
 
 
 @DevicePreviews
 @Composable
 private fun MuscleDetailsBottomSheetCollapsedDarkPreview() =
-    ThemedMuscleDetailsBottomSheetPreview(darkTheme = true, skipPartiallyExpanded = true)
+    ThemedMuscleDetailsBottomSheetPreview(darkTheme = true)
 
 @DevicePreviews
 @Composable
 private fun MuscleDetailsBottomSheetCollapsedLightPreview() =
-    ThemedMuscleDetailsBottomSheetPreview(darkTheme = false, skipPartiallyExpanded = true)
+    ThemedMuscleDetailsBottomSheetPreview(darkTheme = false)

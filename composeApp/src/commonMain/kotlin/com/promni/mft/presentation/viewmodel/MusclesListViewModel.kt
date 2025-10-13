@@ -7,7 +7,7 @@ import com.promni.mft.core.asResult
 import com.promni.mft.domain.model.MuscleInfo
 import com.promni.mft.domain.repository.MuscleFilter
 import com.promni.mft.domain.usecase.GetMuscleFilterUseCase
-import com.promni.mft.domain.usecase.GetMuscleInfoUseCase
+import com.promni.mft.domain.usecase.GetMusclesInfoUseCase
 import com.promni.mft.domain.usecase.SetMuscleFilterUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,16 +17,16 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MusclesListViewModel(
-    getMuscleInfoUseCase: GetMuscleInfoUseCase,
+    getMusclesInfoUseCase: GetMusclesInfoUseCase,
     getMuscleFilterUseCase: GetMuscleFilterUseCase,
     private val setMuscleFilterUseCase: SetMuscleFilterUseCase,
 ) : ViewModel() {
 
-    val muscleUiState: StateFlow<MuscleUiState> = muscleUiState(getMuscleInfoUseCase)
+    val uiState: StateFlow<MusclesListUiState> = muscleUiState(getMusclesInfoUseCase)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = MuscleUiState.Loading
+            initialValue = MusclesListUiState.Loading
         )
 
     val muscleFilter: StateFlow<MuscleFilter> = getMuscleFilterUseCase()
@@ -43,19 +43,19 @@ class MusclesListViewModel(
     }
 }
 
-private fun muscleUiState(getMuscleInfoUseCase: GetMuscleInfoUseCase): Flow<MuscleUiState> =
-    getMuscleInfoUseCase()
+private fun muscleUiState(getMusclesInfoUseCase: GetMusclesInfoUseCase): Flow<MusclesListUiState> =
+    getMusclesInfoUseCase()
         .asResult()
         .map { result ->
             when (result) {
-                is Result.Success -> MuscleUiState.Success(result.data)
-                is Result.Loading -> MuscleUiState.Loading
-                is Result.Error -> MuscleUiState.Error(result.exception)
+                is Result.Success -> MusclesListUiState.Success(result.data)
+                is Result.Loading -> MusclesListUiState.Loading
+                is Result.Error -> MusclesListUiState.Error(result.exception)
             }
         }
 
-sealed interface MuscleUiState {
-    object Loading : MuscleUiState
-    data class Error(val exception: Throwable) : MuscleUiState
-    data class Success(val musclesInfo: List<MuscleInfo>) : MuscleUiState
+sealed interface MusclesListUiState {
+    object Loading : MusclesListUiState
+    data class Error(val exception: Throwable) : MusclesListUiState
+    data class Success(val musclesInfo: List<MuscleInfo>) : MusclesListUiState
 }
