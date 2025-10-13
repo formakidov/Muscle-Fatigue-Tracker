@@ -111,10 +111,10 @@ private fun formatRemainingTime(expectedRecoveryTimestamp: Long): String {
 @Composable
 private fun getBgColor(baseColor: Color, fatigue: Float, isDarkTheme: Boolean = isSystemInDarkTheme()): Color {
     val factor = when {
-        fatigue in 0f..10f -> if (isDarkTheme) 1.5f else 0.7f  // Not tired or very lightly tired - original color
-        fatigue in 11f..33f -> if (isDarkTheme) 1.0f else 0.75f // A bit tired
-        fatigue in 34f..70f -> if (isDarkTheme) 0.5f else 0.9f // Moderately tired
-        fatigue > 70f -> if (isDarkTheme) 0.3f else 1.0f       // Very tired
+        fatigue in 0f..10f -> if (isDarkTheme) 1.5f else 0.8f  // Not tired or very lightly tired
+        fatigue in 11f..33f -> if (isDarkTheme) 1.0f else 0.9f // A bit tired
+        fatigue in 34f..70f -> if (isDarkTheme) 0.5f else 1.0f // Moderately tired
+        fatigue > 70f -> if (isDarkTheme) 0.3f else 1.05f       // Very tired
         else -> 1.0f
     }
 
@@ -124,7 +124,7 @@ private fun getBgColor(baseColor: Color, fatigue: Float, isDarkTheme: Boolean = 
 @Composable
 private fun getTextColor(baseColor: Color, fatigue: Float, isDarkTheme: Boolean = isSystemInDarkTheme()): Color {
     val alpha = when {
-        fatigue in 0f..10f -> if (isDarkTheme) 1.0f else 1.0f  // Not tired or very lightly tired - original color
+        fatigue in 0f..10f -> if (isDarkTheme) 1.0f else 1.0f  // Not tired or very lightly tired
         fatigue in 11f..33f -> if (isDarkTheme) 1.0f else 1.0f // A bit tired
         fatigue in 34f..70f -> if (isDarkTheme) 0.7f else 0.8f // Moderately tired
         fatigue > 70f -> if (isDarkTheme) 0.6f else 0.7f       // Very tired
@@ -137,7 +137,7 @@ private fun getTextColor(baseColor: Color, fatigue: Float, isDarkTheme: Boolean 
 @Composable
 private fun getImageAlpha(fatigue: Float, isDarkTheme: Boolean = isSystemInDarkTheme()): Float {
     val alpha = when {
-        fatigue in 0f..10f -> if (isDarkTheme) 1.0f else 1.0f  // Not tired or very lightly tired - original color
+        fatigue in 0f..10f -> if (isDarkTheme) 1.0f else 1.0f  // Not tired or very lightly tired
         fatigue in 11f..33f -> if (isDarkTheme) 1.0f else 1.0f // A bit tired
         fatigue in 34f..70f -> if (isDarkTheme) 0.7f else 0.8f // Moderately tired
         fatigue > 70f -> if (isDarkTheme) 0.6f else 0.7f       // Very tired
