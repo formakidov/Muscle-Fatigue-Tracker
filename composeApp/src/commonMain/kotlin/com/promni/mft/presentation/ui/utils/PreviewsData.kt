@@ -9,25 +9,25 @@ private const val dayMillis: Long = 24 * 60 * 60 * 1000
 private const val fourDays: Long = 4 * dayMillis
 
 val muscleAbsNotTrained = MuscleInfo(
-    muscle = Muscle(1, "Abdomen"),
+    muscle = Muscle(id = 1, name = "Abs", order = 2),
     fatigue = 0f,
     expectedRecovery = 0,
     totalRecoveryTime = fourDays
 )
 val muscleBicepsEasyTrained = MuscleInfo(
-    muscle = Muscle(2, "Biceps"),
+    muscle = Muscle(id = 2, name = "Biceps", order = 0),
     fatigue = 25f,
     expectedRecovery = SystemTime.nowMillis() + dayMillis,
     totalRecoveryTime = fourDays
 )
 val muscleTricepsMiddleTrained = MuscleInfo(
-    muscle = Muscle(3, "Triceps"),
+    muscle = Muscle(id = 3, name = "Triceps", order = 1),
     fatigue = 50f,
     expectedRecovery = SystemTime.nowMillis() + dayMillis * 2,
     totalRecoveryTime = fourDays
 )
 val muscleQuadricepsHardTrained = MuscleInfo(
-    muscle = Muscle(4, "Quadriceps"),
+    muscle = Muscle(id = 4, name = "Quadriceps", order = 3),
     fatigue = 75f,
     expectedRecovery = SystemTime.nowMillis() + fourDays,
     totalRecoveryTime = fourDays

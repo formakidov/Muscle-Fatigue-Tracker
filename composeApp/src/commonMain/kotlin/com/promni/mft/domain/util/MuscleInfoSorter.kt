@@ -8,5 +8,5 @@ class MuscleInfoSorter {
     fun sort(muscles: List<MuscleInfo>) = muscles.sortedWith(compareBy<MuscleInfo> {
         // Fresh muscles (recovered) should come first.
         if (it.expectedRecovery <= SystemTime.nowMillis()) Long.MIN_VALUE else it.expectedRecovery
-    }.thenBy { it.muscle.name })
+    }.thenBy { it.muscle.order })
 }

@@ -5,16 +5,13 @@ import androidx.room.PrimaryKey
 import com.promni.mft.domain.model.Muscle
 
 
-const val DefaultTotalRecoveryTime = 4 * 24 * 60 * 60 * 1000L // 4 days
-
 @Entity(tableName = "muscles")
 data class MuscleEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val stringId: String,
     val name: String,
-    val totalRecoveryMillis: Long?,
-) {
-    val totalRecovery: Long
-        get() = if (totalRecoveryMillis == null || totalRecoveryMillis == 0L) DefaultTotalRecoveryTime else totalRecoveryMillis
-}
+    val order: Int,
+    val totalRecoveryMillis: Long,
+)
 
-fun MuscleEntity.asExternalModel() = Muscle(id, name)
+fun MuscleEntity.asExternalModel() = Muscle(id, name, order)
