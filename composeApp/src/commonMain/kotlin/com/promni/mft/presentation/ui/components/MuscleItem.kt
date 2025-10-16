@@ -111,8 +111,8 @@ private fun formatRemainingTime(expectedRecoveryTimestamp: Long): String {
 @Composable
 private fun getBgColor(baseColor: Color, fatigue: Float, isDarkTheme: Boolean = isSystemInDarkTheme()): Color {
     val factor = when {
-        fatigue in 0f..10f -> if (isDarkTheme) 1.5f else 0.8f  // Not tired or very lightly tired
-        fatigue in 11f..33f -> if (isDarkTheme) 1.0f else 0.9f // A bit tired
+        fatigue in 0f..10f -> if (isDarkTheme) 1.0f else 0.8f  // Not tired or very lightly tired
+        fatigue in 11f..33f -> if (isDarkTheme) 0.9f else 0.9f // A bit tired
         fatigue in 34f..70f -> if (isDarkTheme) 0.5f else 1.0f // Moderately tired
         fatigue > 70f -> if (isDarkTheme) 0.3f else 1.05f       // Very tired
         else -> 1.0f
