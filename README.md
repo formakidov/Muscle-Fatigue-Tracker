@@ -1,7 +1,7 @@
 # Muscle Fatigue Tracker
 
 ## Overview
-**Muscle Fatigue Tracker** is a Kotlin Multiplatform (KMP) application designed to help users **monitor and track muscle fatigue levels and recovery times**. This project demonstrates modern development best practices, including **MVVM, Clean Architecture, and Jetpack/JetBrains Compose**, and **GitHub Actions** for continuous integration. The app targets **Android, iOS, and Desktop**, with potential for **Wasm** support in the future.
+**Muscle Fatigue Tracker** is a Kotlin Multiplatform (KMP) application designed to help users **monitor and track muscle fatigue levels and recovery times**. This project demonstrates modern development best practices, including **MVVM, Clean Architecture, and Jetpack/JetBrains Compose**, and **GitHub Actions** for continuous integration. The app targets **Android, iOS, and Desktop**.
 
 ## Key Features
 - **Fatigue & Recovery Tracking:** Log fatigue levels for different muscles after workouts.
