@@ -2,16 +2,22 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "bb83709dd9da4f1be014548a57120ef7",
+    "identityHash": "d866293813c45b9a2c19a1121802e870",
     "entities": [
       {
         "tableName": "muscles",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `totalRecoveryMillis` INTEGER)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `stringId` TEXT NOT NULL, `name` TEXT NOT NULL, `order` INTEGER NOT NULL, `totalRecoveryMillis` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stringId",
+            "columnName": "stringId",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -21,9 +27,16 @@
             "notNull": true
           },
           {
+            "fieldPath": "order",
+            "columnName": "order",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "totalRecoveryMillis",
             "columnName": "totalRecoveryMillis",
-            "affinity": "INTEGER"
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -150,7 +163,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bb83709dd9da4f1be014548a57120ef7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd866293813c45b9a2c19a1121802e870')"
     ]
   }
 }

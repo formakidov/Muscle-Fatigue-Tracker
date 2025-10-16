@@ -31,8 +31,8 @@ class GetMuscleInfoUseCaseTest {
     @Test
     fun `invoke calls repository and sorter, and returns sorter's result`() = runTest {
         // Given
-        val muscle1 = Muscle(1, "Biceps")
-        val muscle2 = Muscle(2, "Triceps")
+        val muscle1 = Muscle(1, "Biceps", 0)
+        val muscle2 = Muscle(2, "Triceps", 1)
         val unsortedMuscleInfoList = listOf(
             MuscleInfo(muscle1, fatigue = 0.5f, expectedRecovery = 0L, totalRecoveryTime = 10L),
             MuscleInfo(muscle2, fatigue = 0.3f, expectedRecovery = 1000L, totalRecoveryTime = 10L)

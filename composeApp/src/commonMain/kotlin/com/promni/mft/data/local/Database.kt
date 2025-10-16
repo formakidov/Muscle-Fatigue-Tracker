@@ -7,14 +7,14 @@ import androidx.room.RoomDatabaseConstructor
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
+import com.promni.mft.DefaultRecoveryTimeMillis
 import com.promni.mft.data.local.dao.ExpectedRecoveryDao
 import com.promni.mft.data.local.dao.FatigueLogDao
 import com.promni.mft.data.local.dao.MuscleDao
-import com.promni.mft.data.local.entities.DefaultTotalRecoveryTime
 import com.promni.mft.data.local.entities.ExpectedRecoveryEntity
 import com.promni.mft.data.local.entities.FatigueLogEntity
 import com.promni.mft.data.local.entities.MuscleEntity
-import com.promni.mft.defaultMusclesNames
+import com.promni.mft.defaultMuscles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.datetime.Clock
@@ -75,11 +75,7 @@ private fun getPrepopulationSql(): List<String> {
     val prepopulationList = mutableListOf(getMusclePrepopulationSql())
 
     if (ADD_PREDEFINED_TEST_DATA) {
-        val bicepsId = 1L
-        val tricepsId = 2L
-
-        val fatigueLogEntries = generateFatigueLogEntries(bicepsId) + generateFatigueLogEntries(tricepsId, offsetDays = 2)
-
+        val fatigueLogEntries = generateFatigueLogEntries(1L) + generateFatigueLogEntries(2L, offsetDays = 2)
         prepopulationList.add(getFatigueLogPrepopulationSql(fatigueLogEntries))
         prepopulationList.add(getExpectedRecoveryPrepopulationSql(fatigueLogEntries))
     }
@@ -88,11 +84,10 @@ private fun getPrepopulationSql(): List<String> {
 }
 
 private fun getMusclePrepopulationSql() =
-    defaultMusclesNames.mapIndexed { index, muscle ->
-        // Use "index + 1" to start IDs from 1. An ID of 0 can cause issues with some database operations like updates.
-        "(${index + 1}, '$muscle', NULL)"
+    defaultMuscles.sortedBy { it.order }.mapIndexed { index, muscle ->
+        "(${index + 1}, '${muscle.stringId}', '${muscle.name}', ${muscle.order}, ${muscle.recoveryMillis})"
     }.joinToString(
-        prefix = "INSERT INTO muscles (id, name, totalRecoveryMillis) VALUES ",
+        prefix = "INSERT INTO muscles (id, stringId, name, 'order', totalRecoveryMillis) VALUES ",
         postfix = ";",
         separator = ", "
     )
@@ -133,7 +128,7 @@ private fun getExpectedRecoveryPrepopulationSql(entries: List<FatigueLogEntity>)
         postfix = ";",
         separator = ", "
     ) { latestEntry ->
-        val totalRecoveryTime = DefaultTotalRecoveryTime
+        val totalRecoveryTime = DefaultRecoveryTimeMillis
         val recoveryTimeForLog = (totalRecoveryTime * (latestEntry.value / 100f)).toLong()
         val expectedRecoveryTimestamp = latestEntry.timestamp + recoveryTimeForLog
         val lastUpdatedTimestamp = Clock.System.now().toEpochMilliseconds()

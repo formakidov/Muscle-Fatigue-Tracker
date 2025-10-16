@@ -49,14 +49,14 @@ class MuscleRepositoryImpl(
     }
 
     override suspend fun currentTotalRecoveryTime(id: Long) =
-        muscleDao.item(id)?.totalRecovery ?: throw MuscleNotFoundException(id)
+        muscleDao.item(id)?.totalRecoveryMillis ?: throw MuscleNotFoundException(id)
 
     private fun buildMuscleInfo(
         muscle: MuscleEntity, expectedRecovery: ExpectedRecoveryEntity?
     ) = MuscleInfo(
         muscle = muscle.asExternalModel(),
-        fatigue = RecoveryCalculator.calculateCurrentFatigue(expectedRecovery?.timestamp, muscle.totalRecovery),
+        fatigue = RecoveryCalculator.calculateCurrentFatigue(expectedRecovery?.timestamp, muscle.totalRecoveryMillis),
         expectedRecovery = expectedRecovery?.timestamp ?: 0L,
-        totalRecoveryTime = muscle.totalRecovery
+        totalRecoveryTime = muscle.totalRecoveryMillis
     )
 }
